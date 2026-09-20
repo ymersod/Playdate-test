@@ -1,0 +1,7 @@
+{
+  "stylua.targetReleaseVersion": "latest",
+/*   "playdate-debug.sdkPath": "/path/to/PlaydateSDK", */
+/*   "playdate-debug.sourcePath": "/path/to/MyGame/source", */
+  // "playdate-debug.outputPath": "${workspaceFolder}/build",
+/*   "playdate-debug.productName": "My Game" */
+}
