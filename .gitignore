@@ -24,3 +24,9 @@ $RECYCLE.BIN/
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+# Build files
+*.pdx
+
+# Config
+*.luarc.json
