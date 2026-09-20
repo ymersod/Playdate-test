@@ -1,0 +1,8 @@
+// Shows the recommended extensions popup
+{
+    "recommendations": [
+        "sumneko.lua",
+        "midouest.playdate-debug",
+        "JohnnyMorganz.stylua"
+    ]
+}

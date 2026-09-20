@@ -14,6 +14,7 @@ $RECYCLE.BIN/
 ### VS Code
 # VSCode settings (keep shared configuration)
 .vscode/*
+!playdate-luacats
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
