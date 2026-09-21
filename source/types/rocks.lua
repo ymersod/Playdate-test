@@ -73,7 +73,7 @@ function rock.CheckRocks(context, activeRock, rockSpawnTime)
 	if activeRock and activeRock.health < 1 then
 		-- TODO: Reward player
 
-		-- // SPAWN ROCK COROUTINE (Prob not needed kekw my bad gang)//
+		-- // SPAWN ROCK COROUTINE TODO: Does not work, but might be a great start
 		--[[ rockSpawnTask = coroutine.create(function()
 			local goal = playdate.getCurrentTimeMilliseconds() + (rockSpawnTime * 1000)
 			while playdate.getCurrentTimeMilliseconds() < goal do

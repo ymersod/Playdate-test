@@ -12,6 +12,9 @@ local mineRock = import("helpers/mining")
 ---@type Rock
 local rocks = import("types/rocks")
 
+---@type Utils
+local utils = import("helpers/utils")
+
 -- //GLOBALS//
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
@@ -50,28 +53,24 @@ function playdate.update()
 	gfx.clear()
 
 	---@type number
-	local ticksChange = 0
+	local fullRotation = 0
 
 	if pd.isCrankDocked() then
 		pd.ui.crankIndicator:draw()
 	else
-		ticksChange = pd.getCrankTicks(1)
-
-		-- #### Checks for ticks
-		-- Skip next positive IF negative
-		-- Skip next negative IF positive
-
-		--[[ print(ticksChange) ]]
+		local ticks = pd.getCrankTicks(360)
+		local pos = pd.getCrankPosition()
+		fullRotation = utils.ComputeRealTick(ticks, pos)
 	end
 
 	-- // MINE_ROCK //
-	mineRock.Mine(ticksChange, activeRock)
+	mineRock.Mine(fullRotation, activeRock)
 
 	-- // CHECK ROCKS //
 	local rock, rockSpawnThread = rocks.CheckRocks(context, activeRock, rockSpawnTime)
 	activeRock = rock
 
-	-- // CHECK ROCK SPAWNER //
+	-- // CHECK ROCK SPAWNER // -- TODO: out of order (prob also out of scope hehe)
 	if not rockThread then
 		rockThread = rockSpawnThread
 	end
