@@ -2,7 +2,7 @@
 local mining = {}
 
 ---@param tick number
----@param rock string
+---@param rock RockGeneric
 ---@return number?
 function mining.Mine(tick, rock)
 	if tick < 1 then

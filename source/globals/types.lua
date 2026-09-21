@@ -1,0 +1,3 @@
+-- Types.lua
+---@alias RockType "rock1" | "rock2" | "rock3"
+---@alias RockGeneric { health: number, rocktype: RockType }

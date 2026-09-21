@@ -5,6 +5,7 @@ import("CoreLibs/timer")
 import("CoreLibs/ui")
 import("CoreLibs/crank")
 
+-- //IMPORTS//
 ---@type MineRock
 local mineRock = import("helpers/mining")
 
@@ -14,11 +15,23 @@ local rocks = import("types/rocks")
 ---@type Enums
 local enums = import("globals/enums")
 
--- Globals
+-- //GLOBALS//
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
 
-function Start() end
+-- //GAME VARIABLES//
+---@type RockGeneric?
+local activeRock = nil
+
+-- //GAME FUNCTIONS//
+function Start()
+	local rock = rocks.CreateRock(enums.rockType.rock1)
+	if not rock then
+		error("Failed creating rock")
+	end
+
+	activeRock = rock
+end
 Start()
 
 function playdate.update()
@@ -30,9 +43,6 @@ function playdate.update()
 	if pd.isCrankDocked() then
 		pd.ui.crankIndicator:draw()
 	else
-		-- Calculate velocity from crank angle
-		local change, acceleratedChange = pd.getCrankChange()
-
 		ticksChange = pd.getCrankTicks(1)
 
 		-- #### Checks for ticks
@@ -40,13 +50,14 @@ function playdate.update()
 		-- Skip next negative IF positive
 
 		print(ticksChange)
-
-		-- print("Change: " .. change)
-		-- print("acceleratedChange: " .. acceleratedChange)
 	end
 
-	-- rock needs a type of some sort
-	mineRock.Mine(ticksChange, "rock1")
+	if not activeRock then
+		print("No rock is active...")
+		return
+	end
+
+	mineRock.Mine(ticksChange, activeRock)
 
 	-- Render rock
 end
