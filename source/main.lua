@@ -12,20 +12,26 @@ local mineRock = import("helpers/mining")
 ---@type Rock
 local rocks = import("types/rocks")
 
----@type Enums
-local enums = import("globals/enums")
-
 -- //GLOBALS//
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
+local SCREEN_W <const> = 400
+local SCREEN_H <const> = 240
 
 -- //GAME VARIABLES//
 ---@type RockGeneric?
 local activeRock = nil
 
+---@type GameContext
+local context = {
+	screenState = "rocks",
+	screenH = SCREEN_H,
+	screenW = SCREEN_W,
+}
+
 -- //GAME FUNCTIONS//
 function Start()
-	local rock = rocks.CreateRock(enums.rockType.rock1)
+	local rock = rocks.CreateRock("rock1", context)
 	if not rock then
 		error("Failed creating rock")
 	end
@@ -38,7 +44,7 @@ function playdate.update()
 	gfx.clear()
 
 	---@type number
-	local ticksChange
+	local ticksChange = 0
 
 	if pd.isCrankDocked() then
 		pd.ui.crankIndicator:draw()
@@ -54,10 +60,14 @@ function playdate.update()
 
 	if not activeRock then
 		print("No rock is active...")
+		-- Try to create a new rock i suppose ?
 		return
 	end
 
 	mineRock.Mine(ticksChange, activeRock)
 
-	-- Render rock
+	-- RENDER
+	local sprite = activeRock.sprite
+
+	gfx.drawRect(sprite.x, sprite.y, sprite.w, sprite.h)
 end
