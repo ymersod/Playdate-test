@@ -15,6 +15,9 @@ local rocks = import("types/rocks")
 ---@type Utils
 local utils = import("helpers/utils")
 
+---@type PlayerUpgrades
+local playerUpgrades = import("helpers/playerUpgrades")
+
 -- //GLOBALS//
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
@@ -26,6 +29,14 @@ local SCREEN_H <const> = 240
 local activeRock = nil
 local rockSpawnTime = 2 -- seconds
 local rockThread
+
+---@type PlayerLevels
+local playerLevels = {
+	strength_level = 2,
+	heatsinks_level = 1,
+	ore_value_level = 1,
+	drop_chances_level = 1,
+}
 
 ---@type GameContext
 local context = {
@@ -47,14 +58,17 @@ Start()
 
 local lastUpdate = playdate.getCurrentTimeMilliseconds()
 function playdate.update()
-	local delta = playdate.getCurrentTimeMilliseconds() - lastUpdate -- in ms
-
-	--- //TIME//
 	gfx.clear()
 
+	--- //TIME//
+	local delta = playdate.getCurrentTimeMilliseconds() - lastUpdate -- in ms
+
+	-- //COMPUTE PLAYER UGPRADES
+	local upgrade_mults = playerUpgrades.ComputeValues(playerLevels)
+
+	-- //CRANK LOGIC//
 	---@type number
 	local fullRotation = 0
-
 	if pd.isCrankDocked() then
 		pd.ui.crankIndicator:draw()
 	else
@@ -64,7 +78,7 @@ function playdate.update()
 	end
 
 	-- // MINE_ROCK //
-	mineRock.Mine(fullRotation, activeRock)
+	mineRock.Mine(fullRotation, activeRock, upgrade_mults.strength_mult)
 
 	-- // CHECK ROCKS //
 	local rock, rockSpawnThread = rocks.CheckRocks(context, activeRock, rockSpawnTime)
@@ -91,6 +105,5 @@ function playdate.update()
 
 	gfx.drawRect(sprite.x, sprite.y, sprite.w, sprite.h)
 
-	---@type _Rect
 	gfx.drawText("ROK HP: " .. activeRock.health, sprite.x, sprite.y / 2)
 end
