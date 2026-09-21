@@ -29,20 +29,30 @@ local rock3 = {
 ---@class Rock
 local rock = {}
 
----@param rockType RockType
 ---@param context GameContext
+---@param rockType RockType
 ---@return RockGeneric?
-function rock.CreateRock(rockType, context)
+function rock.CreateRock(context, rockType)
 	---@type RockGeneric?
-	local rockCreated
-
+	local rockFound
 	if rockType == "rock1" then
-		rockCreated = rock1
+		rockFound = rock1
 	elseif rockType == "rock2" then
-		rockCreated = rock2
+		rockFound = rock2
 	elseif rockType == "rock3" then
-		rockCreated = rock3
+		rockFound = rock3
 	end
+
+	if not rockFound then
+		return rockFound
+	end
+
+	---@type RockGeneric
+	local rockCreated = {
+		rockType = rockFound.rockType,
+		health = rockFound.health,
+		sprite = rockFound.sprite,
+	}
 
 	local sprite = rockCreated.sprite
 
@@ -50,6 +60,38 @@ function rock.CreateRock(rockType, context)
 	sprite.y = context.screenH / 2 - sprite.h / 2
 
 	return rockCreated
+end
+
+---@param context GameContext
+---@param activeRock RockGeneric?
+---@param rockSpawnTime number
+---@return RockGeneric?, thread?
+function rock.CheckRocks(context, activeRock, rockSpawnTime)
+	local newRock = activeRock
+	local rockSpawnTask = nil
+
+	if activeRock and activeRock.health < 1 then
+		-- TODO: Reward player
+
+		-- // SPAWN ROCK COROUTINE (Prob not needed kekw my bad gang)//
+		--[[ rockSpawnTask = coroutine.create(function()
+			local goal = playdate.getCurrentTimeMilliseconds() + (rockSpawnTime * 1000)
+			while playdate.getCurrentTimeMilliseconds() < goal do
+				if not coroutine.isyieldable() then
+					return
+				end
+				coroutine.yield()
+			end
+
+			local spawnedRock = rock.CreateRock(context, prevRockType)
+			return spawnedRock
+		end) ]]
+
+		local spawnedRock = rock.CreateRock(context, activeRock.rockType)
+		return spawnedRock, rockSpawnTask
+	end
+
+	return newRock, rockSpawnTask
 end
 
 return rock

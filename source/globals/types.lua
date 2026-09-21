@@ -3,4 +3,4 @@
 ---@alias GameContext {screenState: ScreenState, screenW: number, screenH: number}
 ---@alias RockType "rock1" | "rock2" | "rock3"
 ---@alias RockSprite {w: number, h: number, x: number, y: number}
----@alias RockGeneric { health: number, rocktype: RockType, sprite: RockSprite}
+---@alias RockGeneric { health: number, rockType: RockType, sprite: RockSprite}

@@ -21,6 +21,8 @@ local SCREEN_H <const> = 240
 -- //GAME VARIABLES//
 ---@type RockGeneric?
 local activeRock = nil
+local rockSpawnTime = 2 -- seconds
+local rockThread
 
 ---@type GameContext
 local context = {
@@ -31,7 +33,7 @@ local context = {
 
 -- //GAME FUNCTIONS//
 function Start()
-	local rock = rocks.CreateRock("rock1", context)
+	local rock = rocks.CreateRock(context, "rock1")
 	if not rock then
 		error("Failed creating rock")
 	end
@@ -40,7 +42,11 @@ function Start()
 end
 Start()
 
+local lastUpdate = playdate.getCurrentTimeMilliseconds()
 function playdate.update()
+	local delta = playdate.getCurrentTimeMilliseconds() - lastUpdate -- in ms
+
+	--- //TIME//
 	gfx.clear()
 
 	---@type number
@@ -55,19 +61,37 @@ function playdate.update()
 		-- Skip next positive IF negative
 		-- Skip next negative IF positive
 
-		print(ticksChange)
+		--[[ print(ticksChange) ]]
+	end
+
+	-- // MINE_ROCK //
+	mineRock.Mine(ticksChange, activeRock)
+
+	-- // CHECK ROCKS //
+	local rock, rockSpawnThread = rocks.CheckRocks(context, activeRock, rockSpawnTime)
+	activeRock = rock
+
+	-- // CHECK ROCK SPAWNER //
+	if not rockThread then
+		rockThread = rockSpawnThread
+	end
+	if rockThread then
+		local _, result = coroutine.resume(rockThread)
+		if coroutine.status(rockThread) == "dead" then
+			activeRock = result
+			rockThread = nil
+		end
 	end
 
 	if not activeRock then
-		print("No rock is active...")
-		-- Try to create a new rock i suppose ?
 		return
 	end
 
-	mineRock.Mine(ticksChange, activeRock)
-
-	-- RENDER
+	-- // RENDER //
 	local sprite = activeRock.sprite
 
 	gfx.drawRect(sprite.x, sprite.y, sprite.w, sprite.h)
+
+	---@type _Rect
+	gfx.drawText("ROK HP: " .. activeRock.health, sprite.x, sprite.y / 2)
 end
