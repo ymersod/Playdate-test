@@ -49,12 +49,6 @@ function rock.CreateRock(context, rockType)
 
 	---@type RockGeneric
 	local rockCreated = table.deepcopy(rockFound)
-	--[[ ---@type RockGeneric
-	local rockCreated = {
-		rockType = rockFound.rockType,
-		health = rockFound.health,
-		sprite = rockFound.sprite,
-	} ]]
 
 	local sprite = rockCreated.sprite
 
