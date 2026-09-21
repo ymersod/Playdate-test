@@ -1,3 +1,6 @@
 -- Types.lua
+---@alias ScreenState "rocks" | "upgrades" | "museum"
+---@alias GameContext {screenState: ScreenState, screenW: number, screenH: number}
 ---@alias RockType "rock1" | "rock2" | "rock3"
----@alias RockGeneric { health: number, rocktype: RockType }
+---@alias RockSprite {w: number, h: number, x: number, y: number}
+---@alias RockGeneric { health: number, rocktype: RockType, sprite: RockSprite}
