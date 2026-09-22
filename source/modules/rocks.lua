@@ -64,13 +64,13 @@ end
 ---@param context GameContext
 ---@param activeRock RockGeneric?
 ---@param rockSpawnTime number
----@return RockGeneric?, thread?
+---@return RockGeneric?, RewardTable?, thread?
 function rock.CheckRocks(context, activeRock, rockSpawnTime)
 	local newRock = activeRock
 	local rockSpawnTask = nil
 
-	if activeRock and activeRock.health < 1 then
-		-- TODO: Reward player
+	if activeRock and activeRock.health < 0 then
+		-- TODO: Compute rewards.. prob in here ?
 
 		-- // SPAWN ROCK COROUTINE TODO: Does not work, but might be a great start
 		--[[ rockSpawnTask = coroutine.create(function()
@@ -87,10 +87,12 @@ function rock.CheckRocks(context, activeRock, rockSpawnTime)
 		end) ]]
 
 		local spawnedRock = rock.CreateRock(context, activeRock.rockType)
-		return spawnedRock, rockSpawnTask
+
+		local reward = {}
+		return spawnedRock, reward, rockSpawnTask
 	end
 
-	return newRock, rockSpawnTask
+	return newRock
 end
 
 return rock
