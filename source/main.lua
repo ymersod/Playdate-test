@@ -7,16 +7,19 @@ import("CoreLibs/crank")
 
 -- //IMPORTS//
 ---@type MineRock
-local mineRock = import("helpers/mining")
+local mineRock = import("modules/mining")
 
 ---@type Rock
-local rocks = import("types/rocks")
-
----@type Utils
-local utils = import("helpers/utils")
+local rocks = import("modules/rocks")
 
 ---@type PlayerUpgrades
-local playerUpgrades = import("helpers/playerUpgrades")
+local playerUpgrades = import("modules/playerUpgrades")
+
+---@type PlayerRewards
+local playerRewards = import("modules/playerRewards")
+
+---@type TimeUtils
+local timeUtils = import("utils/timeUtils")
 
 -- //GLOBALS//
 local pd <const> = playdate
@@ -34,7 +37,6 @@ local rockList = {
 	"rock2",
 	"rock3",
 }
-
 local rockSpawnTime = 2 -- seconds
 
 ---@type PlayerLevels
@@ -54,6 +56,8 @@ local context = {
 	screenH = SCREEN_H,
 	screenW = SCREEN_W,
 }
+
+local money = 0
 
 -- // LOCAL HELPERS //
 function SetActiveRock()
@@ -132,22 +136,28 @@ function playdate.update()
 	else
 		local ticks = pd.getCrankTicks(360)
 		local pos = pd.getCrankPosition()
-		fullRotation = utils.ComputeRealTick(ticks, pos)
+		fullRotation = timeUtils.ComputeRealTick(ticks, pos)
 	end
 
 	-- // MINE_ROCK //
 	mineRock.Mine(fullRotation, activeRock, upgrade_mults.strength_mult)
 
 	-- // CHECK ROCKS //
-	local rock, _ = rocks.CheckRocks(context, activeRock, rockSpawnTime)
-	for i, aliveRock in ipairs(aliveRocks) do
-		if aliveRock.rockType == rock.rockType and aliveRock ~= rock then
-			table.remove(aliveRocks, i)
-			table.insert(aliveRocks, i, rock)
-			break
+	local rock, rewardTable = rocks.CheckRocks(context, activeRock, rockSpawnTime)
+	if rewardTable then
+		for i, aliveRock in ipairs(aliveRocks) do
+			if aliveRock.rockType == rock.rockType and aliveRock ~= rock then
+				table.remove(aliveRocks, i)
+				table.insert(aliveRocks, i, rock)
+				break
+			end
 		end
 	end
 
+	local rewardInfo = playerRewards.ComputeRewards(rewardTable)
+	if rewardInfo then
+		money += rewardInfo.value
+	end
 	-- // CHECK ROCK SPAWNER // -- TODO: out of order (prob also out of scope hehe)
 	--[[ if not rockThread then
 		rockThread = rockSpawnThread
@@ -171,4 +181,5 @@ function playdate.update()
 
 	gfx.drawText(activeRock.rockType, sprite.x, 0)
 	gfx.drawText("ROK HP: " .. activeRock.health, sprite.x, 20)
+	gfx.drawText("MONEY: " .. money, 0, 0)
 end
