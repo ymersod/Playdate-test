@@ -36,7 +36,6 @@ local rockList = {
 }
 
 local rockSpawnTime = 2 -- seconds
-local rockThread
 
 ---@type PlayerLevels
 local playerLevels = {
@@ -49,15 +48,18 @@ local playerLevels = {
 ---@type GameContext
 local context = {
 	screenState = "rocks",
-	rockOnScreen = "rock1",
+	rockScreenState = {
+		rockAsNumberOnScreen = 1,
+	},
 	screenH = SCREEN_H,
 	screenW = SCREEN_W,
 }
 
+-- // LOCAL HELPERS //
 function SetActiveRock()
 	local newActiveRock = nil
 	for _, value in ipairs(aliveRocks) do
-		if context.rockOnScreen == value.rockType then
+		if context.rockScreenState.rockAsNumberOnScreen == value.rockTypeNumber then
 			newActiveRock = value
 			value.active = true
 		else
@@ -66,6 +68,30 @@ function SetActiveRock()
 	end
 
 	return newActiveRock
+end
+
+-- // INPUT HANDLING //
+---@param direction number
+function OnRockChange(direction)
+	local nextRock = context.rockScreenState.rockAsNumberOnScreen
+	nextRock += direction
+
+	if nextRock < 1 then
+		nextRock = table.getsize(rockList)
+	elseif nextRock > table.getsize(rockList) then
+		nextRock = 1
+	end
+
+	context.rockScreenState.rockAsNumberOnScreen = nextRock
+	SetActiveRock()
+end
+
+function playdate.leftButtonDown()
+	OnRockChange(-1)
+end
+
+function playdate.rightButtonDown()
+	OnRockChange(1)
 end
 
 -- //GAME FUNCTIONS//

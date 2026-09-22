@@ -10,12 +10,14 @@ local tempSpriteValues = {
 local rock1 = {
 	health = 10,
 	rockType = "rock1",
+	rockTypeNumber = 1,
 	sprite = tempSpriteValues,
 }
 ---@type RockGeneric
 local rock2 = {
 	health = 50,
 	rockType = "rock2",
+	rockTypeNumber = 2,
 	sprite = tempSpriteValues,
 }
 
@@ -23,6 +25,7 @@ local rock2 = {
 local rock3 = {
 	health = 100,
 	rockType = "rock3",
+	rockTypeNumber = 3,
 	sprite = tempSpriteValues,
 }
 
