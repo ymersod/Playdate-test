@@ -154,7 +154,7 @@ function playdate.update()
 		end
 	end
 
-	local rewardInfo = playerRewards.ComputeRewards(rewardTable)
+	local rewardInfo = playerRewards.ComputeRewards(rewardTable, upgrade_mults.ore_value_mult)
 	if rewardInfo then
 		money += rewardInfo.value
 		--[[ 	print(rewardInfo.valuableType)

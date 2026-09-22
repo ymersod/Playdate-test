@@ -12,7 +12,8 @@ function mining.Mine(tick, rock, strength_mult)
 	if tick < 1 then
 		return nil
 	end
-	rock.health -= 1 + (1 * strength_mult)
+
+	rock.health -= strength_mult
 end
 
 return mining

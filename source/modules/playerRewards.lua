@@ -20,8 +20,9 @@ local diamond = {
 local playerRewards = {}
 
 ---@param rewardTable RewardTable?
+---@param oreValueMult number
 ---@return RewardInfo?
-function playerRewards.ComputeRewards(rewardTable)
+function playerRewards.ComputeRewards(rewardTable, oreValueMult)
 	if not rewardTable then
 		return
 	end
@@ -42,7 +43,7 @@ function playerRewards.ComputeRewards(rewardTable)
 		newReward.valuableType = value.valuableType
 
 		table.insert(computedRewardTable, newReward)
-		print("acc is cur: " .. acc)
+		--[[ 		print("acc is cur: " .. acc) ]]
 	end
 
 	if acc ~= 100 then
@@ -79,6 +80,8 @@ function playerRewards.ComputeRewards(rewardTable)
 	else
 		error("Didnt find matching valuable")
 	end
+
+	rewardInfo.value = math.floor(rewardInfo.value * oreValueMult)
 
 	return rewardInfo
 end
