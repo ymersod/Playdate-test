@@ -1,45 +1,102 @@
 ---@class PlayerUpgrades
 local upgrades = {}
 
----@param level number
----@return DropChanceMult
-function ComputeDropChance(level)
-	---@type DropChanceMult
-	local dropChanceMults = {
-		coal_mult = 10 * level,
-		gold_mult = 5 * level,
-		diamond_mult = 5 * level,
-	}
+upgrades.catalog = {
+	{
+		key = "strength_level",
+		name = "Power",
+		prices = { 10, 40, 120, 300, 700 },
+		unit = "damage / turn",
+		description = "Hit harder.",
+	},
+	{
+		key = "heatsinks_level",
+		name = "Heatsinks",
+		prices = { 15, 50, 150, 350, 800 },
+		unit = "heat capacity",
+		description = "Crank longer.",
+	},
+	{
+		key = "ore_value_level",
+		name = "Ore value",
+		prices = { 20, 65, 180, 425, 950 },
+		unit = "ore payout",
+		description = "A better payday.",
+	},
+	{
+		key = "drop_chances_level",
+		name = "Rare finds",
+		prices = { 30, 100, 250, 600, 1200 },
+		unit = "gold + diamond chance",
+		description = "More goodies!",
+	},
+}
 
-	return dropChanceMults
+---@param levels PlayerLevels
+---@param index number
+function upgrades.GetLevel(levels, index)
+	local value = levels[upgrades.catalog[index].key]
+	if type(value) ~= "number" or value ~= value then
+		return 0
+	end
+	return math.max(0, math.min(#upgrades.catalog[index].prices, math.floor(value)))
 end
 
----@param level number
----@return number
-function ComputeOreMult(level)
-	local mult = 1 + (level * 0.25)
-	return mult
+function upgrades.GetCost(levels, index)
+	return upgrades.catalog[index].prices[upgrades.GetLevel(levels, index) + 1]
 end
 
----@param level number
----@return number
-function ComputeStrengthMult(level)
-	local mult = 1 + math.floor(level * 1) -- Tried 1.5 as value but we'd go 1:2:4 which might indicate players think it doubles WHICH IT DOESNT...
-	return mult
+function upgrades.GetEffect(index, level)
+	if index == 1 then
+		return tostring(1 + level)
+	elseif index == 2 then
+		return tostring(100 + 25 * level)
+	elseif index == 3 then
+		return string.format("%.2fx", 1 + 0.25 * level)
+	end
+	return tostring(20 + 10 * level) .. "%"
+end
+
+---@return number, string
+function upgrades.TryPurchase(levels, money, index)
+	if not upgrades.catalog[index] then
+		return money, "invalid"
+	end
+	local cost = upgrades.GetCost(levels, index)
+	if not cost then
+		return money, "maxed"
+	elseif money < cost then
+		return money, "poor"
+	end
+	levels[upgrades.catalog[index].key] = upgrades.GetLevel(levels, index) + 1
+	return money - cost, "bought"
+end
+
+function upgrades.CountAffordable(levels, money)
+	local count = 0
+	for index in ipairs(upgrades.catalog) do
+		local cost = upgrades.GetCost(levels, index)
+		if cost and money >= cost then
+			count += 1
+		end
+	end
+	return count
 end
 
 ---@param playerStats PlayerLevels
 ---@return UpgradeMultipliers
 function upgrades.ComputeValues(playerStats)
-	---@type UpgradeMultipliers
-	local mults = {
-		strength_mult = ComputeStrengthMult(playerStats.strength_level),
-		heatsinks_mult = playerStats.heatsinks_level, --TODO:
-		ore_value_mult = ComputeOreMult(playerStats.ore_value_level),
-		drop_chances_mult = ComputeDropChance(playerStats.drop_chances_level),
+	local dropLevel = upgrades.GetLevel(playerStats, 4)
+	return {
+		strength_mult = 1 + upgrades.GetLevel(playerStats, 1),
+		heatsinks_mult = 1 + upgrades.GetLevel(playerStats, 2) * 0.25,
+		ore_value_mult = 1 + upgrades.GetLevel(playerStats, 3) * 0.25,
+		drop_chances_mult = {
+			coal_mult = 10 * dropLevel,
+			gold_mult = 5 * dropLevel,
+			diamond_mult = 5 * dropLevel,
+		},
 	}
-
-	return mults
 end
 
 return upgrades
