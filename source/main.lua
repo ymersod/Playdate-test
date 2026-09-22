@@ -41,10 +41,10 @@ local rockSpawnTime = 2 -- seconds
 
 ---@type PlayerLevels
 local playerLevels = {
-	strength_level = 1,
-	heatsinks_level = 1,
-	ore_value_level = 1,
-	drop_chances_level = 1,
+	strength_level = 0,
+	heatsinks_level = 0,
+	ore_value_level = 0,
+	drop_chances_level = 0,
 }
 
 ---@type GameContext
@@ -143,7 +143,7 @@ function playdate.update()
 	mineRock.Mine(fullRotation, activeRock, upgrade_mults.strength_mult)
 
 	-- // CHECK ROCKS //
-	local rock, rewardTable = rocks.CheckRocks(context, activeRock, rockSpawnTime)
+	local rock, rewardTable = rocks.CheckRocks(context, activeRock, rockSpawnTime, upgrade_mults)
 	if rewardTable then
 		for i, aliveRock in ipairs(aliveRocks) do
 			if aliveRock.rockType == rock.rockType and aliveRock ~= rock then

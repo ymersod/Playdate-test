@@ -12,6 +12,20 @@ local rock1 = {
 	rockType = "rock1",
 	rockTypeNumber = 1,
 	sprite = tempSpriteValues,
+	dropTable = {
+		{
+			ValuableType = "Coal",
+			chance = 80,
+		},
+		{
+			ValuableType = "Gold",
+			chance = 15,
+		},
+		{
+			ValuableType = "Diamond",
+			chance = 5,
+		},
+	},
 }
 ---@type RockGeneric
 local rock2 = {
@@ -19,6 +33,20 @@ local rock2 = {
 	rockType = "rock2",
 	rockTypeNumber = 2,
 	sprite = tempSpriteValues,
+	dropTable = { -- TODO: Temp so far
+		{
+			ValuableType = "Coal",
+			chance = 80,
+		},
+		{
+			ValuableType = "Gold",
+			chance = 15,
+		},
+		{
+			ValuableType = "Diamond",
+			chance = 5,
+		},
+	},
 }
 
 ---@type RockGeneric
@@ -27,6 +55,20 @@ local rock3 = {
 	rockType = "rock3",
 	rockTypeNumber = 3,
 	sprite = tempSpriteValues,
+	dropTable = { -- TODO: Temp so far
+		{
+			ValuableType = "Coal",
+			chance = 80,
+		},
+		{
+			ValuableType = "Gold",
+			chance = 15,
+		},
+		{
+			ValuableType = "Diamond",
+			chance = 5,
+		},
+	},
 }
 
 ---@class Rock
@@ -61,17 +103,41 @@ function rock.CreateRock(context, rockType)
 	return rockCreated
 end
 
+---@param rock RockGeneric
+---@param drop_chances_mult DropChanceMult
+---@return RewardTable
+function UpdateRewardsTable(rock, drop_chances_mult)
+	---@type RewardTable
+	local rewardTable = {}
+
+	for _, dropData in ipairs(rock.dropTable) do
+		---@type DropValuesKvPs
+		local valCopy = table.deepcopy(dropData)
+
+		if dropData.ValuableType == "Coal" then
+			valCopy.chance -= drop_chances_mult.coal_mult
+		elseif dropData.ValuableType == "Gold" then
+			valCopy.chance += drop_chances_mult.gold_mult
+		elseif dropData.ValuableType == "Diamond" then
+			valCopy.chance += drop_chances_mult.diamond_mult
+		end
+
+		table.insert(rewardTable, valCopy)
+	end
+
+	return rewardTable
+end
+
 ---@param context GameContext
 ---@param activeRock RockGeneric?
 ---@param rockSpawnTime number
+---@param upgrade_mults UpgradeMultipliers
 ---@return RockGeneric?, RewardTable?, thread?
-function rock.CheckRocks(context, activeRock, rockSpawnTime)
+function rock.CheckRocks(context, activeRock, rockSpawnTime, upgrade_mults)
 	local newRock = activeRock
 	local rockSpawnTask = nil
 
 	if activeRock and activeRock.health < 0 then
-		-- TODO: Compute rewards.. prob in here ?
-
 		-- // SPAWN ROCK COROUTINE TODO: Does not work, but might be a great start
 		--[[ rockSpawnTask = coroutine.create(function()
 			local goal = playdate.getCurrentTimeMilliseconds() + (rockSpawnTime * 1000)
@@ -85,11 +151,11 @@ function rock.CheckRocks(context, activeRock, rockSpawnTime)
 			local spawnedRock = rock.CreateRock(context, prevRockType)
 			return spawnedRock
 		end) ]]
+		local updatedRewardsTable = UpdateRewardsTable(activeRock, upgrade_mults.drop_chances_mult)
 
 		local spawnedRock = rock.CreateRock(context, activeRock.rockType)
 
-		local reward = {}
-		return spawnedRock, reward, rockSpawnTask
+		return spawnedRock, updatedRewardsTable, rockSpawnTask
 	end
 
 	return newRock

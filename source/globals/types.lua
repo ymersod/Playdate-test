@@ -2,10 +2,13 @@
 ---@alias ScreenState "rocks" | "upgrades" | "museum"
 ---@alias RockType "rock1" | "rock2" | "rock3"
 ---@alias ValuableType "Diamond" | "Gold" | "Coal"
+---@alias DropValuesKvPs {ValuableType: ValuableType, chance: number}
 ---@alias RockScreenState {rockAsNumberOnScreen: number}
 ---@alias GameContext {screenState: ScreenState, rockScreenState: RockScreenState, screenW: number, screenH: number}
 ---@alias RockSprite {w: number, h: number, x: number, y: number}
----@alias RockGeneric { health: number, rockType: RockType, rockTypeNumber: number, sprite: RockSprite, active: boolean}
+---@alias RockGeneric { health: number, rockType: RockType, rockTypeNumber: number, sprite: RockSprite, active: boolean, dropTable: DropValuesKvPs[]}
 ---@alias PlayerLevels {strength_level: number, heatsinks_level: number, drop_chances_level: number, ore_value_level: number}
----@alias UpgradeMultipliers {strength_mult: number, heatsinks_mult: number, drop_chances_mult: number, ore_value_mult: number}
+---@alias DropChanceMult {coal_mult: number, gold_mult: number, diamond_mult: number}
+---@alias UpgradeMultipliers {strength_mult: number, heatsinks_mult: number, drop_chances_mult: DropChanceMult, ore_value_mult: number}
 ---@alias RewardInfo {valuableType: ValuableType, value: number}
+---@alias RewardTable DropValuesKvPs[]
