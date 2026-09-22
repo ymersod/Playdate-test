@@ -1,8 +1,8 @@
 -- Types.lua
 ---@alias ScreenState "rocks" | "upgrades" | "museum"
----@alias GameContext {screenState: ScreenState, screenW: number, screenH: number}
 ---@alias RockType "rock1" | "rock2" | "rock3"
+---@alias GameContext {screenState: ScreenState, rockOnScreen: RockType, screenW: number, screenH: number}
 ---@alias RockSprite {w: number, h: number, x: number, y: number}
----@alias RockGeneric { health: number, rockType: RockType, sprite: RockSprite}
+---@alias RockGeneric { health: number, rockType: RockType, sprite: RockSprite, active: boolean}
 ---@alias PlayerLevels {strength_level: number, heatsinks_level: number, drop_chances_level: number, ore_value_level: number}
 ---@alias UpgradeMultipliers {strength_mult: number, heatsinks_mult: number, drop_chances_mult: number, ore_value_mult: number}

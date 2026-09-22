@@ -25,14 +25,22 @@ local SCREEN_W <const> = 400
 local SCREEN_H <const> = 240
 
 -- //GAME VARIABLES//
----@type RockGeneric?
-local activeRock = nil
+---@type RockGeneric[]
+local aliveRocks = {}
+
+---@type RockType[]
+local rockList = {
+	"rock1",
+	"rock2",
+	"rock3",
+}
+
 local rockSpawnTime = 2 -- seconds
 local rockThread
 
 ---@type PlayerLevels
 local playerLevels = {
-	strength_level = 2,
+	strength_level = 1,
 	heatsinks_level = 1,
 	ore_value_level = 1,
 	drop_chances_level = 1,
@@ -41,23 +49,47 @@ local playerLevels = {
 ---@type GameContext
 local context = {
 	screenState = "rocks",
+	rockOnScreen = "rock1",
 	screenH = SCREEN_H,
 	screenW = SCREEN_W,
 }
 
--- //GAME FUNCTIONS//
-function Start()
-	local rock = rocks.CreateRock(context, "rock1")
-	if not rock then
-		error("Failed creating rock")
+function SetActiveRock()
+	local newActiveRock = nil
+	for _, value in ipairs(aliveRocks) do
+		if context.rockOnScreen == value.rockType then
+			newActiveRock = value
+			value.active = true
+		else
+			value.active = false
+		end
 	end
 
-	activeRock = rock
+	return newActiveRock
+end
+
+-- //GAME FUNCTIONS//
+function Start()
+	for _, value in ipairs(rockList) do -- Spawn initial rocks
+		local rock = rocks.CreateRock(context, value)
+		table.insert(aliveRocks, rock)
+
+		if not rock then
+			error("Failed creating rock")
+		end
+
+		if rock.rockType == "rock1" then
+			rock.active = true
+		end
+	end
 end
 Start()
 
 local lastUpdate = playdate.getCurrentTimeMilliseconds()
 function playdate.update()
+	---@type RockGeneric?
+	local activeRock = SetActiveRock()
+
 	gfx.clear()
 
 	--- //TIME//
@@ -81,11 +113,17 @@ function playdate.update()
 	mineRock.Mine(fullRotation, activeRock, upgrade_mults.strength_mult)
 
 	-- // CHECK ROCKS //
-	local rock, rockSpawnThread = rocks.CheckRocks(context, activeRock, rockSpawnTime)
-	activeRock = rock
+	local rock, _ = rocks.CheckRocks(context, activeRock, rockSpawnTime)
+	for i, aliveRock in ipairs(aliveRocks) do
+		if aliveRock.rockType == rock.rockType and aliveRock ~= rock then
+			table.remove(aliveRocks, i)
+			table.insert(aliveRocks, i, rock)
+			break
+		end
+	end
 
 	-- // CHECK ROCK SPAWNER // -- TODO: out of order (prob also out of scope hehe)
-	if not rockThread then
+	--[[ if not rockThread then
 		rockThread = rockSpawnThread
 	end
 	if rockThread then
@@ -94,7 +132,7 @@ function playdate.update()
 			activeRock = result
 			rockThread = nil
 		end
-	end
+	end ]]
 
 	if not activeRock then
 		return
@@ -105,5 +143,6 @@ function playdate.update()
 
 	gfx.drawRect(sprite.x, sprite.y, sprite.w, sprite.h)
 
-	gfx.drawText("ROK HP: " .. activeRock.health, sprite.x, sprite.y / 2)
+	gfx.drawText(activeRock.rockType, sprite.x, 0)
+	gfx.drawText("ROK HP: " .. activeRock.health, sprite.x, 20)
 end
