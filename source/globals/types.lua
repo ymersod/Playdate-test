@@ -2,7 +2,7 @@
 ---@alias ScreenState "rocks" | "upgrades" | "museum"
 ---@alias RockType "rock1" | "rock2" | "rock3"
 ---@alias ValuableType "Diamond" | "Gold" | "Coal"
----@alias DropValuesKvPs {ValuableType: ValuableType, chance: number}
+---@alias DropValuesKvPs {valuableType: ValuableType, chance: number}
 ---@alias RockScreenState {rockAsNumberOnScreen: number}
 ---@alias GameContext {screenState: ScreenState, rockScreenState: RockScreenState, screenW: number, screenH: number}
 ---@alias RockSprite {w: number, h: number, x: number, y: number}

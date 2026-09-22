@@ -14,15 +14,15 @@ local rock1 = {
 	sprite = tempSpriteValues,
 	dropTable = {
 		{
-			ValuableType = "Coal",
+			valuableType = "Coal",
 			chance = 80,
 		},
 		{
-			ValuableType = "Gold",
+			valuableType = "Gold",
 			chance = 15,
 		},
 		{
-			ValuableType = "Diamond",
+			valuableType = "Diamond",
 			chance = 5,
 		},
 	},
@@ -35,15 +35,15 @@ local rock2 = {
 	sprite = tempSpriteValues,
 	dropTable = { -- TODO: Temp so far
 		{
-			ValuableType = "Coal",
+			valuableType = "Coal",
 			chance = 80,
 		},
 		{
-			ValuableType = "Gold",
+			valuableType = "Gold",
 			chance = 15,
 		},
 		{
-			ValuableType = "Diamond",
+			valuableType = "Diamond",
 			chance = 5,
 		},
 	},
@@ -57,15 +57,15 @@ local rock3 = {
 	sprite = tempSpriteValues,
 	dropTable = { -- TODO: Temp so far
 		{
-			ValuableType = "Coal",
+			valuableType = "Coal",
 			chance = 80,
 		},
 		{
-			ValuableType = "Gold",
+			valuableType = "Gold",
 			chance = 15,
 		},
 		{
-			ValuableType = "Diamond",
+			valuableType = "Diamond",
 			chance = 5,
 		},
 	},
@@ -114,11 +114,11 @@ function UpdateRewardsTable(rock, drop_chances_mult)
 		---@type DropValuesKvPs
 		local valCopy = table.deepcopy(dropData)
 
-		if dropData.ValuableType == "Coal" then
+		if dropData.valuableType == "Coal" then
 			valCopy.chance -= drop_chances_mult.coal_mult
-		elseif dropData.ValuableType == "Gold" then
+		elseif dropData.valuableType == "Gold" then
 			valCopy.chance += drop_chances_mult.gold_mult
-		elseif dropData.ValuableType == "Diamond" then
+		elseif dropData.valuableType == "Diamond" then
 			valCopy.chance += drop_chances_mult.diamond_mult
 		end
 

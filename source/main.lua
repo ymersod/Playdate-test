@@ -157,6 +157,8 @@ function playdate.update()
 	local rewardInfo = playerRewards.ComputeRewards(rewardTable)
 	if rewardInfo then
 		money += rewardInfo.value
+		--[[ 	print(rewardInfo.valuableType)
+		print(rewardInfo.value) ]]
 	end
 	-- // CHECK ROCK SPAWNER // -- TODO: out of order (prob also out of scope hehe)
 	--[[ if not rockThread then
