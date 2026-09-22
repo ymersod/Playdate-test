@@ -28,6 +28,8 @@ $RECYCLE.BIN/
 
 # Build files
 *.pdx
+/builds/review-source/
+/.sentry-native/
 
 # Config
 *.luarc.json

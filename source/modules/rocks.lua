@@ -137,7 +137,7 @@ function rock.CheckRocks(context, activeRock, rockSpawnTime, upgrade_mults)
 	local newRock = activeRock
 	local rockSpawnTask = nil
 
-	if activeRock and activeRock.health < 0 then
+	if activeRock and activeRock.health <= 0 then
 		-- // SPAWN ROCK COROUTINE TODO: Does not work, but might be a great start
 		--[[ rockSpawnTask = coroutine.create(function()
 			local goal = playdate.getCurrentTimeMilliseconds() + (rockSpawnTime * 1000)

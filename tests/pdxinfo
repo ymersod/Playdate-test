@@ -1,0 +1,5 @@
+name=Upgrade tests
+author=Playdate-test
+bundleID=local.playdatetest.upgrade-tests
+version=1.0
+buildNumber=1

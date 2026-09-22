@@ -4,22 +4,17 @@ local timeUtils = {}
 local currentTickChange = 0
 
 ---@param tick number
----@param pos number
 ---@return number
-function timeUtils.ComputeRealTick(tick, pos)
+function timeUtils.ComputeRealTick(tick)
 	currentTickChange += tick
-	if currentTickChange < -360 then
-		currentTickChange = math.floor(-pos)
-		currentTickChange = 0
-		return 1
-	end
+	local turns = math.floor(math.abs(currentTickChange) / 360)
+	local direction = currentTickChange < 0 and -1 or 1
+	currentTickChange -= turns * 360 * direction
+	return turns
+end
 
-	if currentTickChange >= 360 then
-		currentTickChange = math.floor(pos)
-		return 1
-	end
-
-	return 0
+function timeUtils.Reset()
+	currentTickChange = 0
 end
 
 return timeUtils

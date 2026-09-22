@@ -50,7 +50,7 @@ function playerRewards.ComputeRewards(rewardTable, oreValueMult)
 		error("Acc should be 100 here - u dumbdumb")
 	end
 
-	local rolled = math.random(0, 100)
+	local rolled = math.random(1, 100)
 
 	---@type DropValuesKvPs
 	local rewardCur
