@@ -8,8 +8,8 @@ local coal = {
 }
 
 ---@type RewardInfo
-local gold = {
-	valuableType = "Gold",
+local topaz = {
+	valuableType = "Topaz",
 	value = 50,
 }
 ---@type RewardInfo
@@ -203,8 +203,8 @@ function playerRewards.ComputeRewards(rewardTable, ore_value_mult)
 	rewardInfo.valuableType = rewardCur.valuableType
 	if rewardCur.valuableType == coal.valuableType then
 		rewardInfo.value = coal.value
-	elseif rewardCur.valuableType == gold.valuableType then
-		rewardInfo.value = gold.value
+	elseif rewardCur.valuableType == topaz.valuableType then
+		rewardInfo.value = topaz.value
 	elseif rewardCur.valuableType == diamond.valuableType then
 		rewardInfo.value = diamond.value
 	elseif rewardCur.valuableType == emerald.valuableType then

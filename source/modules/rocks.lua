@@ -23,7 +23,7 @@ local rock1 = {
 			chance = 100,
 		},
 		{
-			valuableType = "Gold",
+			valuableType = "Topaz",
 			chance = 0,
 		},
 		{
@@ -52,7 +52,7 @@ local rock2 = {
 			chance = 70,
 		},
 		{
-			valuableType = "Gold",
+			valuableType = "Topaz",
 			chance = 15,
 		},
 		{
@@ -82,7 +82,7 @@ local rock3 = {
 			chance = 50,
 		},
 		{
-			valuableType = "Gold",
+			valuableType = "Topaz",
 			chance = 5,
 		},
 		{
@@ -145,8 +145,8 @@ function UpdateRewardsTable(rock, drop_chances_mult)
 
 		if dropData.valuableType == "Coal" then
 			valCopy.chance -= drop_chances_mult.coal_mult
-		elseif dropData.valuableType == "Gold" then
-			valCopy.chance += drop_chances_mult.gold_mult
+		elseif dropData.valuableType == "Topaz" then
+			valCopy.chance += drop_chances_mult.topaz_mult
 		elseif dropData.valuableType == "Diamond" then
 			valCopy.chance += drop_chances_mult.diamond_mult
 		elseif dropData.valuableType == "Emerald" then
