@@ -177,7 +177,12 @@ function menu.Draw(upgrades, levels, money, saveFailed)
 	gfx.setColor(gfx.kColorBlack)
 	if installing then
 		Text(string.upper(upgrade.name) .. " INSTALLED   -$" .. paid, 14, 179, small)
-		Text("Level " .. level .. " / " .. #upgrade.prices .. "   -   " .. current .. " " .. upgrade.unit, 14, 195, small)
+		Text(
+			"Level " .. level .. " / " .. #upgrade.prices .. "   -   " .. current .. " " .. upgrade.unit,
+			14,
+			195,
+			small
+		)
 	else
 		Text(current .. (cost and "  >  " .. nextValue or "  /  MAXED") .. "   " .. upgrade.unit, 14, 179, body)
 		local detail = upgrade.description
