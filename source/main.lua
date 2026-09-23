@@ -12,6 +12,9 @@ local mineRock = import("modules/mining")
 ---@type Rock
 local rocks = import("modules/rocks")
 
+---@type Museum
+local museum = import("modules/museum")
+
 ---@type PlayerUpgrades
 local playerUpgrades = import("modules/playerUpgrades")
 
@@ -20,7 +23,10 @@ local playerRewards = import("modules/playerRewards")
 
 ---@type TimeUtils
 local timeUtils = import("utils/timeUtils")
+
+---@type PlayerProgress
 local playerProgress = import("modules/playerProgress")
+
 local upgradeMenu = import("modules/upgradeMenu")
 local rockFeedback = import("modules/rockFeedback")
 
@@ -43,7 +49,11 @@ local rockList = {
 local rockSpawnTime = 2 -- seconds
 
 ---@type PlayerLevels
-local playerLevels, money = playerProgress.Load(playerUpgrades)
+local playerLevels
+---@type number
+local money
+---@type Collectable[]
+local collectables
 
 ---@type GameContext
 local context = {
@@ -60,7 +70,7 @@ local rewardAt = 0
 local saveFailed = false
 
 local function SaveProgress()
-	saveFailed = not playerProgress.Save(playerLevels, money)
+	saveFailed = not playerProgress.Save(playerLevels, money, collectables)
 end
 
 local function OpenUpgrades()
@@ -141,7 +151,16 @@ end
 function playdate.AButtonDown()
 	if context.screenState == "rocks" then
 		OpenUpgrades()
-	elseif context.screenState == "upgrades" and upgradeMenu.CanBuy() then
+	elseif context.screenState == "upgrades" then
+		context.screenState = "rocks"
+		timeUtils.Reset()
+		pd.getCrankChange()
+		upgradeMenu.Sound("move")
+	end
+end
+
+function playdate.BButtonDown()
+	if context.screenState == "upgrades" and upgradeMenu.CanBuy() then
 		local result
 		local cost = playerUpgrades.GetCost(playerLevels, upgradeMenu.GetSelection())
 		money, result = playerUpgrades.TryPurchase(playerLevels, money, upgradeMenu.GetSelection())
@@ -152,17 +171,10 @@ function playdate.AButtonDown()
 	end
 end
 
-function playdate.BButtonDown()
-	if context.screenState == "upgrades" then
-		context.screenState = "rocks"
-		timeUtils.Reset()
-		pd.getCrankChange()
-		upgradeMenu.Sound("move")
-	end
-end
-
 -- //GAME FUNCTIONS//
 function Start()
+	playerLevels, money, collectables = playerProgress.Load(playerUpgrades) -- LOAD
+
 	for _, value in ipairs(rockList) do -- Spawn initial rocks
 		local rock = rocks.CreateRock(context, value)
 		table.insert(aliveRocks, rock)
@@ -175,6 +187,8 @@ function Start()
 			rock.active = true
 		end
 	end
+
+	museum.Start(playerRewards.GetCollectableList())
 end
 Start()
 
@@ -226,16 +240,25 @@ function playdate.update()
 		end
 	end
 
-	local rewardInfo = playerRewards.ComputeRewards(rewardTable, upgrade_mults.ore_value_mult)
-	if rewardInfo then
-		money += rewardInfo.value
-		lastReward = rewardInfo
+	-- // COMPUTE DROPS //
+	local valuableDrop = playerRewards.ComputeRewards(rewardTable, upgrade_mults.ore_value_mult)
+	if valuableDrop then
+		money += valuableDrop.value
+		lastReward = valuableDrop
 		rewardAt = now
 		activeRock = rock
 		rockFeedback.Break(now)
 		upgradeMenu.Sound("reward")
 		SaveProgress()
 	end
+
+	local collectableDrop =
+		playerRewards.ComputeCollectable(valuableDrop, upgrade_mults.drop_chances_mult.collectable_mult, rock.rockType)
+	if collectableDrop then
+		museum.CollectableDropped(collectableDrop, collectables)
+		SaveProgress()
+	end
+
 	-- // CHECK ROCK SPAWNER // -- TODO: out of order (prob also out of scope hehe)
 	--[[ if not rockThread then
 		rockThread = rockSpawnThread
