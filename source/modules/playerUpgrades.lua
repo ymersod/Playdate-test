@@ -87,15 +87,20 @@ end
 ---@return UpgradeMultipliers
 function upgrades.ComputeValues(playerStats)
 	local dropLevel = upgrades.GetLevel(playerStats, 4)
+
+	---@type DropChanceMult
+	local dropChances_mult_computed = {
+		coal_mult = 10 * dropLevel,
+		gold_mult = 5 * dropLevel,
+		diamond_mult = 5 * dropLevel,
+		collectable_mult = 2 * dropLevel,
+	}
+
 	return {
 		strength_mult = 1 + upgrades.GetLevel(playerStats, 1),
 		heatsinks_mult = 1 + upgrades.GetLevel(playerStats, 2) * 0.25,
 		ore_value_mult = 1 + upgrades.GetLevel(playerStats, 3) * 0.25,
-		drop_chances_mult = {
-			coal_mult = 10 * dropLevel,
-			gold_mult = 5 * dropLevel,
-			diamond_mult = 5 * dropLevel,
-		},
+		drop_chances_mult = dropChances_mult_computed,
 	}
 end
 

@@ -226,16 +226,24 @@ function playdate.update()
 		end
 	end
 
-	local rewardInfo = playerRewards.ComputeRewards(rewardTable, upgrade_mults.ore_value_mult)
-	if rewardInfo then
-		money += rewardInfo.value
-		lastReward = rewardInfo
+	-- // COMPUTE DROPS //
+	local valuableDrop = playerRewards.ComputeRewards(rewardTable, upgrade_mults.ore_value_mult)
+	if valuableDrop then
+		money += valuableDrop.value
+		lastReward = valuableDrop
 		rewardAt = now
 		activeRock = rock
 		rockFeedback.Break(now)
 		upgradeMenu.Sound("reward")
 		SaveProgress()
 	end
+
+	local collectableDrop =
+		playerRewards.ComputeCollectable(valuableDrop, upgrade_mults.drop_chances_mult.collectable_mult, rock.rockType)
+	if collectableDrop then
+		SaveProgress()
+	end
+
 	-- // CHECK ROCK SPAWNER // -- TODO: out of order (prob also out of scope hehe)
 	--[[ if not rockThread then
 		rockThread = rockSpawnThread

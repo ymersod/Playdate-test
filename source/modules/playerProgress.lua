@@ -16,6 +16,7 @@ function progress.Load(upgrades)
 	if type(money) ~= "number" or money ~= money or money == math.huge then
 		money = 0
 	end
+
 	return cleanLevels, math.max(0, math.floor(money))
 end
 
