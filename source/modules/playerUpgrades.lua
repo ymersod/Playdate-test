@@ -99,8 +99,8 @@ function upgrades.ComputeValues(playerStats)
 	}
 
 	return {
-		strength_mult = 1 + upgrades.GetLevel(playerStats, 1),
-		heatsinks_mult = 1 + upgrades.GetLevel(playerStats, 2) * 0.25,
+		strength_mult = 2 ^ (upgrades.GetLevel(playerStats, 1) + 1) - 1,
+		heatsinks_mult = 1 + upgrades.GetLevel(playerStats, 2) * 2,
 		ore_value_mult = 1 + upgrades.GetLevel(playerStats, 3) * 0.25,
 		drop_chances_mult = dropChances_mult_computed,
 	}

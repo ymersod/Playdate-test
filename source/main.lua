@@ -27,6 +27,7 @@ local timeUtils = import("utils/timeUtils")
 ---@type PlayerProgress
 local playerProgress = import("modules/playerProgress")
 
+---@type HUD
 local upgradeMenu = import("modules/upgradeMenu")
 local miningScene = import("modules/miningScene")
 local titleMenu = import("modules/titleMenu")
@@ -80,9 +81,13 @@ local function ResetPresentation()
 end
 
 local function HasProgress()
-	if money > 0 or #collectables > 0 then return true end
+	if money > 0 or #collectables > 0 then
+		return true
+	end
 	for index in ipairs(playerUpgrades.catalog) do
-		if playerUpgrades.GetLevel(playerLevels, index) > 0 then return true end
+		if playerUpgrades.GetLevel(playerLevels, index) > 0 then
+			return true
+		end
 	end
 	return false
 end
@@ -92,7 +97,9 @@ local function SpawnRocks()
 	context.rockScreenState.rockAsNumberOnScreen = 1
 	for _, value in ipairs(rockList) do
 		local rock = rocks.CreateRock(context, value)
-		if not rock then error("Failed creating rock") end
+		if not rock then
+			error("Failed creating rock")
+		end
 		table.insert(aliveRocks, rock)
 	end
 end
@@ -232,6 +239,7 @@ end
 function Start()
 	playerLevels, money, collectables = playerProgress.Load(playerUpgrades) -- LOAD
 	SpawnRocks()
+
 	museum.Start(playerRewards.GetCollectableList())
 	ResetPresentation()
 	titleMenu.Open(HasProgress())
@@ -251,7 +259,6 @@ function playdate.update()
 
 	-- //COMPUTE PLAYER UGPRADES
 	local upgrade_mults = playerUpgrades.ComputeValues(playerLevels)
-	mineRock.Cool(delta, upgrade_mults.heatsinks_mult)
 	local change = pd.getCrankChange()
 	if context.screenState == "title" then
 		titleMenu.Draw(money, saveFailed)
@@ -264,19 +271,29 @@ function playdate.update()
 	end
 	gfx.clear()
 
+	local _, overHeated = mineRock.GetHeat()
+
 	-- //CRANK LOGIC//
 	---@type number
 	local fullRotation = 0
 	if not pd.isCrankDocked() and context.screenState == "rocks" then
-		fullRotation = timeUtils.ComputeRealTick(change)
+		fullRotation = timeUtils.ComputeRealTick(change, overHeated)
 	end
 
 	-- // MINE_ROCK //
-	local hits = mineRock.Mine(fullRotation, activeRock, upgrade_mults.strength_mult, upgrade_mults.heatsinks_mult)
+	local hits =
+		mineRock.Mine(fullRotation, activeRock, upgrade_mults.strength_mult, upgrade_mults.heatsinks_mult, overHeated)
 	if hits > 0 then
 		miningScene.Hit(now, activeRock)
-		if activeRock.health > 0 then upgradeMenu.Sound("hit") end
+		if activeRock.health > 0 then
+			upgradeMenu.Sound("hit")
+		end
 	end
+
+	local rpsMover = mineRock.UpdateRPSBar(change, delta)
+	local isInHeatZone =
+		mineRock.IsInHeatZone(activeRock.heatToMatch, upgrade_mults.heatsinks_mult, rpsMover, activeRock.heatBuffer)
+	local heat, overheated = mineRock.UpdateHeat(isInHeatZone, delta)
 
 	-- // CHECK ROCKS //
 	local rock, rewardTable = rocks.CheckRocks(context, activeRock, rockSpawnTime, upgrade_mults)
@@ -295,9 +312,13 @@ function playdate.update()
 	if valuableDrop then
 		money += valuableDrop.value
 		local collectableDrop = playerRewards.ComputeCollectable(
-			valuableDrop, upgrade_mults.drop_chances_mult.collectable_mult, activeRock.rockType
+			valuableDrop,
+			upgrade_mults.drop_chances_mult.collectable_mult,
+			activeRock.rockType
 		)
-		if collectableDrop then museum.CollectableDropped(collectableDrop, collectables) end
+		if collectableDrop then
+			museum.CollectableDropped(collectableDrop, collectables)
+		end
 		miningScene.Break(now, activeRock, valuableDrop, collectableDrop)
 		activeRock = rock
 		upgradeMenu.Sound("break")
@@ -309,10 +330,20 @@ function playdate.update()
 	end
 
 	-- // RENDER //
-	local heat, overheated = mineRock.GetHeat(upgrade_mults.heatsinks_mult)
 	local collected, rare = miningScene.Update(delta, change, not pd.isCrankDocked() and not overheated, now)
 	if collected > 0 then
 		upgradeMenu.Sound(rare and "reward" or "collect")
 	end
-	miningScene.Draw(activeRock, upgrade_mults, heat, overheated, playerUpgrades.CountAffordable(playerLevels, money), saveFailed)
+
+	miningScene.Draw(
+		activeRock,
+		upgrade_mults,
+		rpsMover,
+		overheated,
+		playerUpgrades.CountAffordable(playerLevels, money),
+		saveFailed,
+		rock.heatToMatch,
+		upgrade_mults.heatsinks_mult + activeRock.heatBuffer,
+		heat
+	)
 end

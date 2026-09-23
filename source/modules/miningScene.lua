@@ -11,7 +11,9 @@ local drillFrames = {
 	gfx.image.new("assets/textures/ui/drill_animation3"),
 	gfx.image.new("assets/textures/ui/drill_animation4"),
 }
-for index, image in ipairs(drillFrames) do drillFrames[index] = image:scaledImage(0.75) end
+for index, image in ipairs(drillFrames) do
+	drillFrames[index] = image:scaledImage(0.75)
+end
 local rockFrames = {
 	gfx.image.new("assets/textures/stone1/stone1_default"),
 	gfx.image.new("assets/textures/stone1/stone1_slightly_cracked"),
@@ -55,7 +57,9 @@ local function Text(text, x, y, font, white)
 end
 
 local function Particle(x, y, vx, vy, life, image)
-	if #particles >= 28 then table.remove(particles, 1) end
+	if #particles >= 28 then
+		table.remove(particles, 1)
+	end
 	table.insert(particles, { x = x, y = y, vx = vx, vy = vy, life = life, age = 0, image = image })
 end
 
@@ -92,7 +96,14 @@ function scene.Break(now, rock, reward, collectable)
 	local x, y = rock.sprite.x + 64, rock.sprite.y + 58
 	for index = 1, 3 do
 		local direction = index % 2 == 0 and -1 or 1
-		Particle(x + direction * 24, y + index * 6, direction * (60 + index * 17), -95 - index * 12, 0.48 + index * 0.025, pieces[index])
+		Particle(
+			x + direction * 24,
+			y + index * 6,
+			direction * (60 + index * 17),
+			-95 - index * 12,
+			0.48 + index * 0.025,
+			pieces[index]
+		)
 		Particle(x - direction * 14, y + 22, -direction * (38 + index * 19), -50 - index * 8, 0.35)
 	end
 	if #drops >= 8 then
@@ -100,9 +111,15 @@ function scene.Break(now, rock, reward, collectable)
 		table.remove(drops, 1)
 	end
 	table.insert(drops, {
-		x = x, y = y + 38, startX = x, startY = y + 38, age = 0,
+		x = x,
+		y = y + 38,
+		startX = x,
+		startY = y + 38,
+		age = 0,
 		vx = impact % 2 == 0 and 115 or -115,
-		value = reward.value, name = reward.valuableType, rare = rare,
+		value = reward.value,
+		name = reward.valuableType,
+		rare = rare,
 	})
 	if collectable then
 		findName = collectable.collectableType
@@ -131,7 +148,9 @@ function scene.Update(delta, change, canDrill, now)
 		particle.vy += delta * 340
 		particle.x += particle.vx * delta
 		particle.y += particle.vy * delta
-		if particle.age >= particle.life then table.remove(particles, index) end
+		if particle.age >= particle.life then
+			table.remove(particles, index)
+		end
 	end
 	local collected, rare = 0, false
 	for index = #drops, 1, -1 do
@@ -163,7 +182,9 @@ function scene.Update(delta, change, canDrill, now)
 	return collected, rare
 end
 
-function scene.Draw(rock, values, heat, overheated, affordable, saveFailed)
+local displayHeat = 0
+local visualTargetHeat = 0
+function scene.Draw(rock, values, heat, overheated, affordable, saveFailed, targetHeat, heatBuffer, activeHeat)
 	local now = pd.getCurrentTimeMilliseconds()
 	local rockX, rockY, screenX, screenY, flashing = feedback.GetOffsets(now)
 	gfx.clear(gfx.kColorBlack)
@@ -171,7 +192,9 @@ function scene.Draw(rock, values, heat, overheated, affordable, saveFailed)
 	background:draw(0, 0)
 	gfx.setClipRect(48, 30, 304, 190)
 	local rumble = activity > 0.1 and math.floor(math.sin(now * 0.11) * activity * 1.5) or 0
-	local drill = overheated and hotDrill or activity > 0.08 and drillFrames[math.floor(phase) % #drillFrames + 1] or idleDrill
+	local drill = pd.isCrankDocked() and hotDrill
+		or activity > 0.08 and drillFrames[math.floor(phase) % #drillFrames + 1]
+		or idleDrill
 	local drillTop = math.floor(drillY + kick)
 	local rodTop = drillTop + 68
 	if rodTop < 220 then
@@ -187,9 +210,21 @@ function scene.Draw(rock, values, heat, overheated, affordable, saveFailed)
 		rockFrames[4]:draw(sprite.x + rockX, sprite.y + rockY)
 	elseif age >= 300 then
 		local ratio = rock.health / rock.maxHealth
-		local frame = ratio > 0.7 and 1 or ratio > 0.35 and 2 or 3
+		local frame = 1
+		if ratio <= 0.75 then
+			frame = 2
+		end
+		if ratio <= 0.5 then
+			frame = 3
+		end
+		if ratio <= 0.25 then
+			frame = 4
+		end
+
 		local arrival = math.max(0, 1 - (age - 300) / 140)
-		if flashing then gfx.setImageDrawMode(gfx.kDrawModeInverted) end
+		if flashing then
+			gfx.setImageDrawMode(gfx.kDrawModeInverted)
+		end
 		rockFrames[frame]:draw(sprite.x + rockX, math.floor(sprite.y + rockY - arrival * arrival * 18))
 		gfx.setImageDrawMode(gfx.kDrawModeCopy)
 	end
@@ -212,33 +247,87 @@ function scene.Draw(rock, values, heat, overheated, affordable, saveFailed)
 		gfx.fillRoundRect(7, 0, body:getTextWidth(wallet) + 10, 24, 3)
 	end
 	Text(wallet, 12, 2 - pulse * 2, body, pulse == 0)
-	local name = "< ROCK " .. rock.rockTypeNumber .. " >"
+	local name = "< " .. rock.rockName .. " >"
 	Text(name, 388 - body:getTextWidth(name), 2, body, true)
-	Text("HEAT", 7, 44, small, true)
+
+	-- // SPEED BAR
+	Text("SPE.", 17, 48, small, true)
 	gfx.setColor(gfx.kColorWhite)
 	gfx.drawRoundRect(17, 65, 12, 108, 3)
-	local fill = math.floor(math.min(1, heat) * 102)
+
+	displayHeat = displayHeat or 0
+	displayHeat = displayHeat + (heat - displayHeat) * 0.15
+
+	print(targetHeat)
+	local fill = math.floor(math.min(1, displayHeat) * 102)
 	gfx.fillRect(20, 170 - fill, 6, fill)
-	Text(overheated and "HOT" or "OK", 10, 179, small, true)
+
+	-- // SPEED TARGET
+	visualTargetHeat = visualTargetHeat or targetHeat
+	visualTargetHeat = visualTargetHeat + (targetHeat - visualTargetHeat) * 0.1
+
+	local calced = 108 / 100 * heatBuffer * 2
+	local heatTargetVisualH = calced
+
+	local heatMaxY = 65
+	local heatMinY = 65 + 108
+
+	local diff = heatMinY - heatMaxY
+	local heatDiff = diff * (visualTargetHeat / 100)
+	local curHeatY = heatMinY - heatDiff - heatBuffer
+
+	if curHeatY < heatMaxY then
+		local diff = heatMaxY - curHeatY
+		curHeatY = heatMaxY
+		heatTargetVisualH -= diff
+	end
+
+	local left = heatMinY - curHeatY
+	if heatTargetVisualH > left then
+		heatTargetVisualH = left
+	end
+
+	gfx.setColor(gfx.kColorWhite)
+	gfx.drawRoundRect(15, curHeatY - 2, 16, heatTargetVisualH + 4, 4)
+
+	gfx.setColor(gfx.kColorBlack)
+	gfx.drawRoundRect(17, curHeatY, 12, heatTargetVisualH, 2)
+
+	-- // HEAT-BAR
+	gfx.setColor(gfx.kColorWhite)
+	gfx.drawRoundRect(4, 75, 10, 108, 3)
+
+	local fill = math.floor((activeHeat / 100) * 102)
+	gfx.fillRect(6, 181 - fill, 6, fill)
+	Text("HEAT", 4, 185, small, true)
+
 	Text("PWR", 366, 44, small, true)
-	Text(tostring(values.strength_mult), 377 - body:getTextWidth(tostring(values.strength_mult)) / 2, 64, body, true)
+	local dmg = overheated and values.strength_mult * 2 or values.strength_mult
+	Text(tostring(dmg), 377 - body:getTextWidth(tostring(values.strength_mult)) / 2, 64, body, true)
 	local hp = tostring(rock.health) .. "/" .. rock.maxHealth
+	gfx.setColor(gfx.kColorBlack)
+	gfx.fillRoundRect(200 - small:getTextWidth(hp) / 2 - 7, 30, small:getTextWidth(hp) + 14, 21, 3)
+
 	gfx.setColor(gfx.kColorWhite)
 	gfx.fillRoundRect(200 - small:getTextWidth(hp) / 2 - 6, 31, small:getTextWidth(hp) + 12, 19, 3)
+
 	Text(hp, 200 - small:getTextWidth(hp) / 2, 34, small)
 	local prompt = affordable > 0 and "A Upgrades (" .. affordable .. ")" or "A Upgrades"
 	Text(saveFailed and "Save failed - retry in Menu" or prompt, 10, 224, small, true)
 	Text("B Title", 350, 224, small, true)
 	if not saveFailed and (overheated or pd.isCrankDocked()) then
-		local hint = overheated and "Cooling..." or "Undock to drill"
+		local hint = overheated and "!!!OVERHEAT!!! DRILL BABY DRILL" or "Undock to drill"
 		local width = small:getTextWidth(hint)
 		Text(hint, 218 - width / 2, 224, small, true)
 	end
 	if now - findAt < 2200 or now - collectedAt < 850 then
 		local found = now - findAt < 2200
-		local text = found and "FOUND: " .. string.upper(findName) or "+$" .. collectedValue .. " " .. string.upper(collectedName)
+		local text = found and "FOUND: " .. string.upper(findName)
+			or "+$" .. collectedValue .. " " .. string.upper(collectedName)
 		local x = math.max(88, body:getTextWidth(wallet) + 28)
-		if x + small:getTextWidth(text) > 268 then text = found and string.upper(findName) or "+$" .. collectedValue end
+		if x + small:getTextWidth(text) > 268 then
+			text = found and string.upper(findName) or "+$" .. collectedValue
+		end
 		Text(text, x, 5, small, true)
 	end
 	for _, drop in ipairs(drops) do
