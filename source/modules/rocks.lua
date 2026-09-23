@@ -6,6 +6,11 @@ local tempSpriteValues = {
 	y = 0,
 }
 
+-- PLEASE READ
+-- NOTEs FOR CHANGING DROPTABLES
+-- COAL CANNOT GO BELOW 50
+-- DROPS SHOULD ADD UP TO 100
+
 ---@type RockGeneric
 local rock1 = {
 	health = 10,
@@ -15,15 +20,23 @@ local rock1 = {
 	dropTable = {
 		{
 			valuableType = "Coal",
-			chance = 80,
+			chance = 50,
 		},
 		{
 			valuableType = "Gold",
-			chance = 15,
+			chance = 30,
 		},
 		{
 			valuableType = "Diamond",
-			chance = 5,
+			chance = 12,
+		},
+		{
+			valuableType = "Emerald",
+			chance = 7,
+		},
+		{
+			valuableType = "Ruby",
+			chance = 1,
 		},
 	},
 }
@@ -33,18 +46,26 @@ local rock2 = {
 	rockType = "rock2",
 	rockTypeNumber = 2,
 	sprite = tempSpriteValues,
-	dropTable = { -- TODO: Temp so far
+	dropTable = {
 		{
 			valuableType = "Coal",
-			chance = 80,
+			chance = 50,
 		},
 		{
 			valuableType = "Gold",
-			chance = 15,
+			chance = 30,
 		},
 		{
 			valuableType = "Diamond",
-			chance = 5,
+			chance = 12,
+		},
+		{
+			valuableType = "Emerald",
+			chance = 7,
+		},
+		{
+			valuableType = "Ruby",
+			chance = 1,
 		},
 	},
 }
@@ -55,18 +76,26 @@ local rock3 = {
 	rockType = "rock3",
 	rockTypeNumber = 3,
 	sprite = tempSpriteValues,
-	dropTable = { -- TODO: Temp so far
+	dropTable = {
 		{
 			valuableType = "Coal",
-			chance = 80,
+			chance = 50,
 		},
 		{
 			valuableType = "Gold",
-			chance = 15,
+			chance = 30,
 		},
 		{
 			valuableType = "Diamond",
-			chance = 5,
+			chance = 12,
+		},
+		{
+			valuableType = "Emerald",
+			chance = 7,
+		},
+		{
+			valuableType = "Ruby",
+			chance = 1,
 		},
 	},
 }
@@ -120,6 +149,10 @@ function UpdateRewardsTable(rock, drop_chances_mult)
 			valCopy.chance += drop_chances_mult.gold_mult
 		elseif dropData.valuableType == "Diamond" then
 			valCopy.chance += drop_chances_mult.diamond_mult
+		elseif dropData.valuableType == "Emerald" then
+			valCopy.chance += drop_chances_mult.emerald_mult
+		elseif dropData.valuableType == "Ruby" then
+			valCopy.chance += drop_chances_mult.ruby_mult
 		end
 
 		table.insert(rewardTable, valCopy)

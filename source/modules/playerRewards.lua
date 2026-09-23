@@ -18,6 +18,18 @@ local diamond = {
 	value = 200,
 }
 
+---@type RewardInfo
+local emerald = {
+	valuableType = "Emerald",
+	value = 200,
+}
+
+---@type RewardInfo
+local ruby = {
+	valuableType = "Ruby",
+	value = 200,
+}
+
 --- // COLLECTABLES //
 local BASE_COLLECTABLE_CHANCE = 2
 
@@ -188,16 +200,17 @@ function playerRewards.ComputeRewards(rewardTable, ore_value_mult)
 
 	---@type RewardInfo
 	local rewardInfo = {}
-
+	rewardInfo.valuableType = rewardCur.valuableType
 	if rewardCur.valuableType == coal.valuableType then
-		rewardInfo.valuableType = rewardCur.valuableType
 		rewardInfo.value = coal.value
 	elseif rewardCur.valuableType == gold.valuableType then
-		rewardInfo.valuableType = rewardCur.valuableType
 		rewardInfo.value = gold.value
 	elseif rewardCur.valuableType == diamond.valuableType then
-		rewardInfo.valuableType = rewardCur.valuableType
 		rewardInfo.value = diamond.value
+	elseif rewardCur.valuableType == emerald.valuableType then
+		rewardInfo.value = emerald.value
+	elseif rewardCur.valuableType == ruby.valuableType then
+		rewardInfo.value = ruby.value
 	else
 		error("Didnt find matching valuable")
 	end

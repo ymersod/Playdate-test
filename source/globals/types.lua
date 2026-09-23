@@ -1,7 +1,7 @@
 -- Types.lua
 ---@alias ScreenState "rocks" | "upgrades" | "museum"
 ---@alias RockType "rock1" | "rock2" | "rock3"
----@alias ValuableType "Diamond" | "Gold" | "Coal"
+---@alias ValuableType "Diamond" | "Gold" | "Coal" | "Emerald" | "Ruby"
 ---@alias CollectableType "Boot" | "Bone" | "Ring"
 ---@alias DropValuesKvPs {valuableType: ValuableType, chance: number}
 ---@alias RockScreenState {rockAsNumberOnScreen: number}
@@ -9,7 +9,7 @@
 ---@alias RockSprite {w: number, h: number, x: number, y: number}
 ---@alias RockGeneric { health: number, rockType: RockType, rockTypeNumber: number, sprite: RockSprite, active: boolean, dropTable: DropValuesKvPs[]}
 ---@alias PlayerLevels {strength_level: number, heatsinks_level: number, drop_chances_level: number, ore_value_level: number}
----@alias DropChanceMult {coal_mult: number, gold_mult: number, diamond_mult: number, collectable_mult: number}
+---@alias DropChanceMult {coal_mult: number, gold_mult: number, diamond_mult: number, emerald_mult: number, ruby_mult: number, collectable_mult: number}
 ---@alias UpgradeMultipliers {strength_mult: number, heatsinks_mult: number, drop_chances_mult: DropChanceMult, ore_value_mult: number}
 ---@alias RewardInfo {valuableType: ValuableType, value: number}
 ---@alias RewardTable DropValuesKvPs[]

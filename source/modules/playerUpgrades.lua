@@ -92,7 +92,9 @@ function upgrades.ComputeValues(playerStats)
 	local dropChances_mult_computed = {
 		coal_mult = 10 * dropLevel,
 		gold_mult = 5 * dropLevel,
-		diamond_mult = 5 * dropLevel,
+		diamond_mult = 2 * dropLevel,
+		emerald_mult = 2 * dropLevel,
+		ruby_mult = 1 * dropLevel,
 		collectable_mult = 2 * dropLevel,
 	}
 

@@ -5,7 +5,7 @@ local overheated = false
 
 function mining.Cool(delta, heatsinks_mult)
 	heat = math.max(0, heat - delta * 14)
-	if heat <= 100 * heatsinks_mult * 0.35 then
+	if heat <= 10000 * heatsinks_mult * 0.35 then
 		overheated = false
 	end
 end
