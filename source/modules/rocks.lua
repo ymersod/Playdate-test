@@ -20,23 +20,23 @@ local rock1 = {
 	dropTable = {
 		{
 			valuableType = "Coal",
-			chance = 50,
+			chance = 100,
 		},
 		{
 			valuableType = "Gold",
-			chance = 30,
+			chance = 0,
 		},
 		{
 			valuableType = "Diamond",
-			chance = 12,
+			chance = 0,
 		},
 		{
 			valuableType = "Emerald",
-			chance = 7,
+			chance = 0,
 		},
 		{
 			valuableType = "Ruby",
-			chance = 1,
+			chance = 0,
 		},
 	},
 }
@@ -49,23 +49,23 @@ local rock2 = {
 	dropTable = {
 		{
 			valuableType = "Coal",
-			chance = 50,
+			chance = 70,
 		},
 		{
 			valuableType = "Gold",
-			chance = 30,
+			chance = 15,
 		},
 		{
 			valuableType = "Diamond",
-			chance = 12,
+			chance = 5,
 		},
 		{
 			valuableType = "Emerald",
-			chance = 7,
+			chance = 5,
 		},
 		{
 			valuableType = "Ruby",
-			chance = 1,
+			chance = 5,
 		},
 	},
 }
@@ -83,19 +83,19 @@ local rock3 = {
 		},
 		{
 			valuableType = "Gold",
-			chance = 30,
+			chance = 5,
 		},
 		{
 			valuableType = "Diamond",
-			chance = 12,
+			chance = 10,
 		},
 		{
 			valuableType = "Emerald",
-			chance = 7,
+			chance = 15,
 		},
 		{
 			valuableType = "Ruby",
-			chance = 1,
+			chance = 20,
 		},
 	},
 }
