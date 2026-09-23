@@ -295,8 +295,12 @@ function scene.Draw(rock, values, heat, overheated, affordable, saveFailed, targ
 	local dmg = overheated and values.strength_mult * 2 or values.strength_mult
 	Text(tostring(dmg), 377 - body:getTextWidth(tostring(values.strength_mult)) / 2, 64, body, true)
 	local hp = tostring(rock.health) .. "/" .. rock.maxHealth
+	gfx.setColor(gfx.kColorBlack)
+	gfx.fillRoundRect(200 - small:getTextWidth(hp) / 2 - 7, 30, small:getTextWidth(hp) + 14, 21, 3)
+
 	gfx.setColor(gfx.kColorWhite)
 	gfx.fillRoundRect(200 - small:getTextWidth(hp) / 2 - 6, 31, small:getTextWidth(hp) + 12, 19, 3)
+
 	Text(hp, 200 - small:getTextWidth(hp) / 2, 34, small)
 	local prompt = affordable > 0 and "A Upgrades (" .. affordable .. ")" or "A Upgrades"
 	Text(saveFailed and "Save failed - retry in Menu" or prompt, 10, 224, small, true)
