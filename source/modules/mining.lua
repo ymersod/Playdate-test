@@ -14,6 +14,8 @@ function mining.GetHeat(heatsinks_mult)
 	return heat / (100 * heatsinks_mult), overheated
 end
 
+function mining.UpdateHeatTarget(heat_target) end
+
 ---@param tick number
 ---@param rock RockGeneric?
 ---@param strength_mult number

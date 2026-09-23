@@ -151,16 +151,7 @@ end
 function playdate.AButtonDown()
 	if context.screenState == "rocks" then
 		OpenUpgrades()
-	elseif context.screenState == "upgrades" then
-		context.screenState = "rocks"
-		timeUtils.Reset()
-		pd.getCrankChange()
-		upgradeMenu.Sound("move")
-	end
-end
-
-function playdate.BButtonDown()
-	if context.screenState == "upgrades" and upgradeMenu.CanBuy() then
+	elseif context.screenState == "upgrades" and upgradeMenu.CanBuy() then
 		local result
 		local cost = playerUpgrades.GetCost(playerLevels, upgradeMenu.GetSelection())
 		money, result = playerUpgrades.TryPurchase(playerLevels, money, upgradeMenu.GetSelection())
@@ -168,6 +159,15 @@ function playdate.BButtonDown()
 		if result == "bought" then
 			SaveProgress()
 		end
+	end
+end
+
+function playdate.BButtonDown()
+	if context.screenState == "upgrades" then
+		context.screenState = "rocks"
+		timeUtils.Reset()
+		pd.getCrankChange()
+		upgradeMenu.Sound("move")
 	end
 end
 
@@ -217,7 +217,7 @@ function playdate.update()
 	-- //CRANK LOGIC//
 	---@type number
 	local fullRotation = 0
-	if not pd.isCrankDocked() then
+	if not pd.isCrankDocked() and context.screenState == "rocks" then
 		fullRotation = timeUtils.ComputeRealTick(change)
 	end
 
