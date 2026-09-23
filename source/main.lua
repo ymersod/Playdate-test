@@ -43,7 +43,13 @@ local rockList = {
 local rockSpawnTime = 2 -- seconds
 
 ---@type PlayerLevels
-local playerLevels, money = playerProgress.Load(playerUpgrades)
+local playerLevels
+---@type number
+local money
+---@type CollectableList
+local collectables
+
+playerLevels, money, collectables = playerProgress.Load(playerUpgrades)
 
 ---@type GameContext
 local context = {
@@ -60,7 +66,7 @@ local rewardAt = 0
 local saveFailed = false
 
 local function SaveProgress()
-	saveFailed = not playerProgress.Save(playerLevels, money)
+	saveFailed = not playerProgress.Save(playerLevels, money, collectables)
 end
 
 local function OpenUpgrades()
@@ -141,7 +147,16 @@ end
 function playdate.AButtonDown()
 	if context.screenState == "rocks" then
 		OpenUpgrades()
-	elseif context.screenState == "upgrades" and upgradeMenu.CanBuy() then
+	elseif context.screenState == "upgrades" then
+		context.screenState = "rocks"
+		timeUtils.Reset()
+		pd.getCrankChange()
+		upgradeMenu.Sound("move")
+	end
+end
+
+function playdate.BButtonDown()
+	if context.screenState == "upgrades" and upgradeMenu.CanBuy() then
 		local result
 		local cost = playerUpgrades.GetCost(playerLevels, upgradeMenu.GetSelection())
 		money, result = playerUpgrades.TryPurchase(playerLevels, money, upgradeMenu.GetSelection())
@@ -149,15 +164,6 @@ function playdate.AButtonDown()
 		if result == "bought" then
 			SaveProgress()
 		end
-	end
-end
-
-function playdate.BButtonDown()
-	if context.screenState == "upgrades" then
-		context.screenState = "rocks"
-		timeUtils.Reset()
-		pd.getCrankChange()
-		upgradeMenu.Sound("move")
 	end
 end
 
@@ -241,6 +247,7 @@ function playdate.update()
 	local collectableDrop =
 		playerRewards.ComputeCollectable(valuableDrop, upgrade_mults.drop_chances_mult.collectable_mult, rock.rockType)
 	if collectableDrop then
+		table.insert(collectables, collectableDrop)
 		SaveProgress()
 	end
 
