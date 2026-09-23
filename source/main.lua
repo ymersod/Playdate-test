@@ -12,6 +12,9 @@ local mineRock = import("modules/mining")
 ---@type Rock
 local rocks = import("modules/rocks")
 
+---@type Museum
+local museum = import("modules/museum")
+
 ---@type PlayerUpgrades
 local playerUpgrades = import("modules/playerUpgrades")
 
@@ -20,7 +23,10 @@ local playerRewards = import("modules/playerRewards")
 
 ---@type TimeUtils
 local timeUtils = import("utils/timeUtils")
+
+---@type PlayerProgress
 local playerProgress = import("modules/playerProgress")
+
 local upgradeMenu = import("modules/upgradeMenu")
 local rockFeedback = import("modules/rockFeedback")
 
@@ -46,10 +52,8 @@ local rockSpawnTime = 2 -- seconds
 local playerLevels
 ---@type number
 local money
----@type CollectableList
+---@type Collectable[]
 local collectables
-
-playerLevels, money, collectables = playerProgress.Load(playerUpgrades)
 
 ---@type GameContext
 local context = {
@@ -169,6 +173,8 @@ end
 
 -- //GAME FUNCTIONS//
 function Start()
+	playerLevels, money, collectables = playerProgress.Load(playerUpgrades) -- LOAD
+
 	for _, value in ipairs(rockList) do -- Spawn initial rocks
 		local rock = rocks.CreateRock(context, value)
 		table.insert(aliveRocks, rock)
@@ -181,6 +187,8 @@ function Start()
 			rock.active = true
 		end
 	end
+
+	museum.Start(playerRewards.GetCollectableList())
 end
 Start()
 
@@ -247,7 +255,7 @@ function playdate.update()
 	local collectableDrop =
 		playerRewards.ComputeCollectable(valuableDrop, upgrade_mults.drop_chances_mult.collectable_mult, rock.rockType)
 	if collectableDrop then
-		table.insert(collectables, collectableDrop)
+		museum.CollectableDropped(collectableDrop, collectables)
 		SaveProgress()
 	end
 

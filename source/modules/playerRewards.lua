@@ -97,7 +97,7 @@ function playerRewards.ComputeCollectable(valueableDrop, collectable_mult, rock)
 	end
 
 	if not collectableTable then
-		print("Didn't find collectable table for " .. rock)
+		warn("Didn't find collectable table for " .. rock)
 		return
 	end
 
@@ -205,6 +205,11 @@ function playerRewards.ComputeRewards(rewardTable, ore_value_mult)
 	rewardInfo.value = math.floor(rewardInfo.value * ore_value_mult)
 
 	return rewardInfo
+end
+
+---@return CollectableList
+function playerRewards.GetCollectableList()
+	return collectableList
 end
 
 return playerRewards
