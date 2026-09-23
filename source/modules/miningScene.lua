@@ -210,7 +210,17 @@ function scene.Draw(rock, values, heat, overheated, affordable, saveFailed, targ
 		rockFrames[4]:draw(sprite.x + rockX, sprite.y + rockY)
 	elseif age >= 300 then
 		local ratio = rock.health / rock.maxHealth
-		local frame = ratio > 0.7 and 1 or ratio > 0.35 and 2 or 3
+		local frame = 1
+		if ratio <= 0.75 then
+			frame = 2
+		end
+		if ratio <= 0.5 then
+			frame = 3
+		end
+		if ratio <= 0.25 then
+			frame = 4
+		end
+
 		local arrival = math.max(0, 1 - (age - 300) / 140)
 		if flashing then
 			gfx.setImageDrawMode(gfx.kDrawModeInverted)
