@@ -15,6 +15,7 @@ local tempSpriteValues = {
 local rock1 = {
 	health = 10,
 	rockType = "rock1",
+	heatBuffer = 40,
 	rockTypeNumber = 1,
 	sprite = tempSpriteValues,
 	dropTable = {
@@ -44,6 +45,7 @@ local rock1 = {
 local rock2 = {
 	health = 50,
 	rockType = "rock2",
+	heatBuffer = 10,
 	rockTypeNumber = 2,
 	sprite = tempSpriteValues,
 	dropTable = {
@@ -75,6 +77,7 @@ local rock3 = {
 	health = 100,
 	rockType = "rock3",
 	rockTypeNumber = 3,
+	heatBuffer = 5,
 	sprite = tempSpriteValues,
 	dropTable = {
 		{
@@ -129,6 +132,8 @@ function rock.CreateRock(context, rockType)
 
 	sprite.x = context.screenW / 2 - sprite.w / 2
 	sprite.y = context.screenH / 2 - sprite.h / 2
+
+	rockCreated.heatToMatch = math.random(10, 100) -- TODO: TEMP
 
 	return rockCreated
 end

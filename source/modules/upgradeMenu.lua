@@ -1,5 +1,7 @@
 local pd <const> = playdate
 local gfx <const> = pd.graphics
+
+---@class HUD
 local menu = {}
 local small = gfx.font.new("fonts/Roobert-10-Bold")
 local body = gfx.font.new("fonts/Roobert-11-Medium")
