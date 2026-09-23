@@ -27,7 +27,7 @@ upgrades.catalog = {
 		key = "drop_chances_level",
 		name = "Rare finds",
 		prices = { 30, 100, 250, 600, 1200 },
-		unit = "gold + diamond chance",
+		unit = "rare ore chance",
 		description = "More goodies!",
 	},
 }
@@ -54,7 +54,7 @@ function upgrades.GetEffect(index, level)
 	elseif index == 3 then
 		return string.format("%.2fx", 1 + 0.25 * level)
 	end
-	return tostring(20 + 10 * level) .. "%"
+	return "+" .. tostring(10 * level) .. "%"
 end
 
 ---@return number, string

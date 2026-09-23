@@ -1,7 +1,7 @@
 -- //DATA//
 local tempSpriteValues = {
-	w = 50,
-	h = 50,
+	w = 128,
+	h = 128,
 	x = 0,
 	y = 0,
 }
@@ -123,6 +123,7 @@ function rock.CreateRock(context, rockType)
 
 	---@type RockGeneric
 	local rockCreated = table.deepcopy(rockFound)
+	rockCreated.maxHealth = rockCreated.health
 
 	local sprite = rockCreated.sprite
 

@@ -3,8 +3,14 @@ local mining = {}
 local heat = 0
 local overheated = false
 
+function mining.Reset()
+	heat = 0
+	overheated = false
+end
+
 function mining.Cool(delta, heatsinks_mult)
-	heat = math.max(0, heat - delta * 14)
+	local cooling = 14 * heatsinks_mult * heatsinks_mult
+	heat = math.max(0, heat - delta * cooling)
 	if heat <= 10000 * heatsinks_mult * 0.35 then
 		overheated = false
 	end

@@ -72,6 +72,12 @@ function menu.Sound(kind)
 		notes[2]:playNote(1047, 0.17, 0.12, pd.sound.getCurrentTime() + 0.09)
 	elseif kind == "hit" then
 		notes[1]:playNote(185, 0.12, 0.025)
+	elseif kind == "break" then
+		notes[1]:playNote(82, 0.24, 0.08)
+		notes[2]:playNote(123, 0.15, 0.06)
+	elseif kind == "collect" then
+		notes[1]:playNote(880, 0.16, 0.055)
+		notes[2]:playNote(1175, 0.12, 0.065, pd.sound.getCurrentTime() + 0.045)
 	else
 		notes[1]:playNote(440, 0.12, 0.025)
 	end
@@ -208,31 +214,6 @@ function menu.Draw(upgrades, levels, money, saveFailed)
 	local action = not cost and "A Maxed" or money >= cost and "A Buy $" .. cost or "Need $" .. (cost - money)
 	Text(action, 149, 224, small, true)
 	RightText("B Back", 388, 224, small, true)
-end
-
-function menu.DrawMiningHUD(upgrades, levels, money, heat, overheated, reward, rewardAt, saveFailed)
-	gfx.setColor(gfx.kColorBlack)
-	Text("$" .. money, 12, 7, heading)
-	Text("DRILL HEAT", 12, 46, small)
-	gfx.drawRoundRect(12, 65, 16, 119, 3)
-	local fill = math.floor(math.min(1, heat) * 113)
-	gfx.fillRect(15, 181 - fill, 10, fill)
-	Text(overheated and "COOLING" or "READY", 12, 190, small)
-	if reward and pd.getCurrentTimeMilliseconds() - rewardAt < 1800 then
-		local text = "+$" .. reward.value .. "  " .. string.upper(reward.valuableType)
-		local width = body:getTextWidth(text) + 24
-		gfx.fillRoundRect(200 - width / 2, 157, width, 29, 4)
-		Text(text, 212 - width / 2, 162, body, true)
-	end
-	local affordable = upgrades.CountAffordable(levels, money)
-	local prompt = affordable > 0 and "A Upgrades (" .. affordable .. " ready)" or "A Upgrades"
-	if saveFailed then
-		prompt = "Save failed - retry in menu"
-	end
-	gfx.fillRect(-6, 220, 412, 26)
-	Text(prompt, 10, 224, small, true)
-	RightText("CRANK Mine", 390, 224, small, true)
-	gfx.setFont(body)
 end
 
 return menu

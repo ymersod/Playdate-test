@@ -39,4 +39,14 @@ function progress.Save(levels, money, collectables)
 	return ok and result ~= false
 end
 
+function progress.Reset(upgrades)
+	local levels = {}
+	for _, upgrade in ipairs(upgrades.catalog) do
+		levels[upgrade.key] = 0
+	end
+	local collectables = {}
+	if not progress.Save(levels, 0, collectables) then return nil end
+	return levels, 0, collectables
+end
+
 return progress

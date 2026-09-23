@@ -28,7 +28,8 @@ local timeUtils = import("utils/timeUtils")
 local playerProgress = import("modules/playerProgress")
 
 local upgradeMenu = import("modules/upgradeMenu")
-local rockFeedback = import("modules/rockFeedback")
+local miningScene = import("modules/miningScene")
+local titleMenu = import("modules/titleMenu")
 
 -- //GLOBALS//
 local pd <const> = playdate
@@ -57,7 +58,7 @@ local collectables
 
 ---@type GameContext
 local context = {
-	screenState = "rocks",
+	screenState = "title",
 	rockScreenState = {
 		rockAsNumberOnScreen = 1,
 	},
@@ -65,30 +66,58 @@ local context = {
 	screenW = SCREEN_W,
 }
 
-local lastReward = nil
-local rewardAt = 0
 local saveFailed = false
+local gameStarted = false
 
 local function SaveProgress()
 	saveFailed = not playerProgress.Save(playerLevels, money, collectables)
 end
 
-local function OpenUpgrades()
-	context.screenState = "upgrades"
-	rockFeedback.Reset()
+local function ResetPresentation()
+	miningScene.Reset(money)
 	timeUtils.Reset()
 	pd.getCrankChange()
+end
+
+local function HasProgress()
+	if money > 0 or #collectables > 0 then return true end
+	for index in ipairs(playerUpgrades.catalog) do
+		if playerUpgrades.GetLevel(playerLevels, index) > 0 then return true end
+	end
+	return false
+end
+
+local function SpawnRocks()
+	aliveRocks = {}
+	context.rockScreenState.rockAsNumberOnScreen = 1
+	for _, value in ipairs(rockList) do
+		local rock = rocks.CreateRock(context, value)
+		if not rock then error("Failed creating rock") end
+		table.insert(aliveRocks, rock)
+	end
+end
+
+local function ShowTitle()
+	SaveProgress()
+	context.screenState = "title"
+	ResetPresentation()
+	titleMenu.Open(gameStarted or HasProgress())
+end
+
+local function OpenUpgrades()
+	context.screenState = "upgrades"
+	ResetPresentation()
 	upgradeMenu.Open(money)
 end
 
 pd.gameWillTerminate = SaveProgress
 local function PauseGame()
-	rockFeedback.Reset()
+	ResetPresentation()
 	SaveProgress()
 end
 pd.deviceWillSleep = PauseGame
 pd.gameWillPause = PauseGame
-pd.getSystemMenu():addMenuItem("Upgrades", OpenUpgrades)
+pd.getSystemMenu():addMenuItem("Title screen", ShowTitle)
 pd.getSystemMenu():addMenuItem("Save progress", SaveProgress)
 pd.getSystemMenu():addCheckmarkMenuItem("Mute effects", false, upgradeMenu.SetMuted)
 
@@ -110,7 +139,7 @@ end
 -- // INPUT HANDLING //
 ---@param direction number
 function OnRockChange(direction)
-	rockFeedback.Reset()
+	miningScene.Reset(money)
 	local nextRock = context.rockScreenState.rockAsNumberOnScreen
 	nextRock += direction
 
@@ -139,17 +168,41 @@ end
 function playdate.upButtonDown()
 	if context.screenState == "upgrades" then
 		upgradeMenu.Select(-1)
+	elseif context.screenState == "title" and titleMenu.Select() then
+		upgradeMenu.Sound("move")
 	end
 end
 
 function playdate.downButtonDown()
 	if context.screenState == "upgrades" then
 		upgradeMenu.Select(1)
+	elseif context.screenState == "title" and titleMenu.Select() then
+		upgradeMenu.Sound("move")
 	end
 end
 
 function playdate.AButtonDown()
-	if context.screenState == "rocks" then
+	if context.screenState == "title" then
+		local action = titleMenu.Accept()
+		if action == "reset" then
+			local levels, balance, finds = playerProgress.Reset(playerUpgrades)
+			if not levels then
+				titleMenu.SaveFailed()
+				upgradeMenu.Sound("poor")
+				return
+			end
+			playerLevels, money, collectables = levels, balance, finds
+			saveFailed = false
+			SpawnRocks()
+			mineRock.Reset()
+		end
+		if action then
+			gameStarted = true
+			context.screenState = "rocks"
+			ResetPresentation()
+		end
+		upgradeMenu.Sound("move")
+	elseif context.screenState == "rocks" then
 		OpenUpgrades()
 	elseif context.screenState == "upgrades" and upgradeMenu.CanBuy() then
 		local result
@@ -165,8 +218,12 @@ end
 function playdate.BButtonDown()
 	if context.screenState == "upgrades" then
 		context.screenState = "rocks"
-		timeUtils.Reset()
-		pd.getCrankChange()
+		ResetPresentation()
+		upgradeMenu.Sound("move")
+	elseif context.screenState == "rocks" then
+		ShowTitle()
+		upgradeMenu.Sound("move")
+	elseif context.screenState == "title" and titleMenu.Back() then
 		upgradeMenu.Sound("move")
 	end
 end
@@ -174,21 +231,10 @@ end
 -- //GAME FUNCTIONS//
 function Start()
 	playerLevels, money, collectables = playerProgress.Load(playerUpgrades) -- LOAD
-
-	for _, value in ipairs(rockList) do -- Spawn initial rocks
-		local rock = rocks.CreateRock(context, value)
-		table.insert(aliveRocks, rock)
-
-		if not rock then
-			error("Failed creating rock")
-		end
-
-		if rock.rockType == "rock1" then
-			rock.active = true
-		end
-	end
-
+	SpawnRocks()
 	museum.Start(playerRewards.GetCollectableList())
+	ResetPresentation()
+	titleMenu.Open(HasProgress())
 end
 Start()
 
@@ -199,7 +245,7 @@ function playdate.update()
 
 	--- //TIME//
 	local now = pd.getCurrentTimeMilliseconds()
-	local delta = math.min((now - lastUpdate) / 1000, 0.1)
+	local delta = math.max(0, math.min((now - lastUpdate) / 1000, 0.1))
 	lastUpdate = now
 	pd.timer.updateTimers()
 
@@ -207,6 +253,10 @@ function playdate.update()
 	local upgrade_mults = playerUpgrades.ComputeValues(playerLevels)
 	mineRock.Cool(delta, upgrade_mults.heatsinks_mult)
 	local change = pd.getCrankChange()
+	if context.screenState == "title" then
+		titleMenu.Draw(money, saveFailed)
+		return
+	end
 	if context.screenState == "upgrades" then
 		upgradeMenu.Crank(change)
 		upgradeMenu.Draw(playerUpgrades, playerLevels, money, saveFailed)
@@ -224,8 +274,8 @@ function playdate.update()
 	-- // MINE_ROCK //
 	local hits = mineRock.Mine(fullRotation, activeRock, upgrade_mults.strength_mult, upgrade_mults.heatsinks_mult)
 	if hits > 0 then
-		rockFeedback.Hit(now)
-		upgradeMenu.Sound("hit")
+		miningScene.Hit(now, activeRock)
+		if activeRock.health > 0 then upgradeMenu.Sound("hit") end
 	end
 
 	-- // CHECK ROCKS //
@@ -244,57 +294,25 @@ function playdate.update()
 	local valuableDrop = playerRewards.ComputeRewards(rewardTable, upgrade_mults.ore_value_mult)
 	if valuableDrop then
 		money += valuableDrop.value
-		lastReward = valuableDrop
-		rewardAt = now
+		local collectableDrop = playerRewards.ComputeCollectable(
+			valuableDrop, upgrade_mults.drop_chances_mult.collectable_mult, activeRock.rockType
+		)
+		if collectableDrop then museum.CollectableDropped(collectableDrop, collectables) end
+		miningScene.Break(now, activeRock, valuableDrop, collectableDrop)
 		activeRock = rock
-		rockFeedback.Break(now)
-		upgradeMenu.Sound("reward")
+		upgradeMenu.Sound("break")
 		SaveProgress()
 	end
-
-	local collectableDrop =
-		playerRewards.ComputeCollectable(valuableDrop, upgrade_mults.drop_chances_mult.collectable_mult, rock.rockType)
-	if collectableDrop then
-		museum.CollectableDropped(collectableDrop, collectables)
-		SaveProgress()
-	end
-
-	-- // CHECK ROCK SPAWNER // -- TODO: out of order (prob also out of scope hehe)
-	--[[ if not rockThread then
-		rockThread = rockSpawnThread
-	end
-	if rockThread then
-		local _, result = coroutine.resume(rockThread)
-		if coroutine.status(rockThread) == "dead" then
-			activeRock = result
-			rockThread = nil
-		end
-	end ]]
 
 	if not activeRock then
 		return
 	end
 
 	-- // RENDER //
-	local sprite = activeRock.sprite
-	local rockX, rockY, screenX, screenY, flashing = rockFeedback.GetOffsets(now)
-	gfx.setDrawOffset(screenX, screenY)
 	local heat, overheated = mineRock.GetHeat(upgrade_mults.heatsinks_mult)
-	upgradeMenu.DrawMiningHUD(playerUpgrades, playerLevels, money, heat, overheated, lastReward, rewardAt, saveFailed)
-
-	if flashing then
-		gfx.fillRect(sprite.x + rockX - 2, sprite.y + rockY - 2, sprite.w + 4, sprite.h + 4)
-	else
-		gfx.drawRect(sprite.x + rockX, sprite.y + rockY, sprite.w, sprite.h)
+	local collected, rare = miningScene.Update(delta, change, not pd.isCrankDocked() and not overheated, now)
+	if collected > 0 then
+		upgradeMenu.Sound(rare and "reward" or "collect")
 	end
-
-	gfx.drawText("<  " .. string.upper(activeRock.rockType) .. "  >", 163, 12)
-	gfx.drawText("HP " .. activeRock.health, sprite.x, 40)
-	gfx.drawText(upgrade_mults.strength_mult .. " damage / turn", 137, 194)
-	if overheated then
-		gfx.drawText("Too hot! Let it cool.", 126, 66)
-	elseif pd.isCrankDocked() then
-		gfx.drawText("Undock the crank to mine", 105, 66)
-	end
-	gfx.setDrawOffset(0, 0)
+	miningScene.Draw(activeRock, upgrade_mults, heat, overheated, playerUpgrades.CountAffordable(playerLevels, money), saveFailed)
 end
