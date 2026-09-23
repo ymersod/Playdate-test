@@ -247,7 +247,7 @@ function scene.Draw(rock, values, heat, overheated, affordable, saveFailed, targ
 		gfx.fillRoundRect(7, 0, body:getTextWidth(wallet) + 10, 24, 3)
 	end
 	Text(wallet, 12, 2 - pulse * 2, body, pulse == 0)
-	local name = "< ROCK " .. rock.rockTypeNumber .. " >"
+	local name = "< " .. rock.rockName .. " >"
 	Text(name, 388 - body:getTextWidth(name), 2, body, true)
 
 	-- // SPEED BAR
