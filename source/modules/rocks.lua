@@ -1,10 +1,4 @@
 -- //DATA//
-local tempSpriteValues = {
-	w = 128,
-	h = 128,
-	x = 0,
-	y = 0,
-}
 
 -- PLEASE READ
 -- NOTEs FOR CHANGING DROPTABLES
@@ -15,9 +9,8 @@ local tempSpriteValues = {
 local rock1 = {
 	health = 10,
 	rockType = "rock1",
-	heatBuffer = 40,
+	heatBuffer = 20,
 	rockTypeNumber = 1,
-	sprite = tempSpriteValues,
 	dropTable = {
 		{
 			valuableType = "Coal",
@@ -47,7 +40,6 @@ local rock2 = {
 	rockType = "rock2",
 	heatBuffer = 10,
 	rockTypeNumber = 2,
-	sprite = tempSpriteValues,
 	dropTable = {
 		{
 			valuableType = "Coal",
@@ -78,7 +70,6 @@ local rock3 = {
 	rockType = "rock3",
 	rockTypeNumber = 3,
 	heatBuffer = 5,
-	sprite = tempSpriteValues,
 	dropTable = {
 		{
 			valuableType = "Coal",
@@ -128,10 +119,14 @@ function rock.CreateRock(context, rockType)
 	local rockCreated = table.deepcopy(rockFound)
 	rockCreated.maxHealth = rockCreated.health
 
+	local newSprite = {}
+	rockCreated.sprite = newSprite
 	local sprite = rockCreated.sprite
 
+	sprite.w = 128
+	sprite.h = 128
 	sprite.x = context.screenW / 2 - sprite.w / 2
-	sprite.y = context.screenH / 2 - sprite.h / 2
+	sprite.y = (context.screenH / 2 - sprite.h / 2) + 30
 
 	rockCreated.heatToMatch = math.random(10, 100) -- TODO: TEMP
 
