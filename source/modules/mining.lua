@@ -13,6 +13,8 @@ function mining.GetHeat()
 	return heat, overheated
 end
 
+local RPS_START = 1.5
+local RPS_MAX = 4.5
 local playerRotationSpeed = 0
 local rpsMover = 0.0
 local heatBarMoveSmoothing = 10
@@ -30,17 +32,16 @@ function mining.UpdateRPSBar(rotationDelta, delta)
 
 	playerRotationSpeed += math.max(-maxChange, math.min(maxChange, rpsDifference))
 
-	-- // HEAT MOVER
-	local targetMover = math.max(0, math.min(playerRotationSpeed / 5, 1))
+	-- // RPS BAR
+	local targetMover = 0
 
-	if rpsMover then
-		local heatInc = (targetMover - rpsMover) / heatBarMoveSmoothing
-		rpsMover += heatInc
+	if playerRotationSpeed > RPS_START then
+		targetMover = math.min((playerRotationSpeed - RPS_START) / (RPS_MAX - RPS_START), 1)
 	end
 
-	-- // HEAT
-	--[[ playerHeat += playerRotationSpeed * heatRate * delta
-	playerHeat = math.max(0, math.min(playerHeat, 100)) ]]
+	-- // SMOOTHING
+	local heatInc = (targetMover - rpsMover) / heatBarMoveSmoothing
+	rpsMover += heatInc
 
 	return rpsMover
 end
