@@ -389,11 +389,11 @@ function scene.Draw(
 		local image = oreImages[oreName]
 
 		gfx.setColor(gfx.kColorWhite)
-		gfx.fillRoundRect(359, y - 1, 38, 24, 4)
+		gfx.fillRoundRect(355, y - 1, 45, 24, 0)
 
 		local t
 		if image then
-			image:drawScaled(361, y + 2, 0.5)
+			image:drawScaled(355, y + 3, 0.5)
 			for _, value in ipairs(tablee) do
 				if value.valuableType == oreName then
 					t = value.chance
@@ -401,11 +401,11 @@ function scene.Draw(
 				end
 			end
 		else
-			Text(oreName, 364, y + 3, body)
+			Text(oreName, 358, y + 3, body)
 			t = collectMult
 		end
 
-		Text(t, 378, y + 3, small, false)
+		Text(t, 373, y + 4, small, false)
 	end
 
 	local hp = tostring(rock.health) .. "/" .. rock.maxHealth
