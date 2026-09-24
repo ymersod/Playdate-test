@@ -6,7 +6,7 @@ local heading = gfx.font.new("fonts/Roobert-20-Medium")
 local body = gfx.font.new("fonts/Roobert-11-Medium")
 local small = gfx.font.new("fonts/Roobert-10-Bold")
 local selected = 1
-local canContinue = false
+local canContinue = true
 local confirming = false
 local confirmedAt = 0
 local errorAt = -10000
@@ -20,7 +20,6 @@ end
 
 function menu.Open(hasProgress)
 	selected = 1
-	canContinue = hasProgress
 	confirming = false
 	errorAt = -10000
 end
