@@ -80,6 +80,9 @@ function menu.Sound(kind)
 	elseif kind == "collect" then
 		notes[1]:playNote(880, 0.16, 0.055)
 		notes[2]:playNote(1175, 0.12, 0.065, pd.sound.getCurrentTime() + 0.045)
+	elseif kind == "overheat" then
+		notes[1]:playNote(220, 0.12, 0.06)
+		notes[2]:playNote(165, 0.12, 0.06, pd.sound.getCurrentTime() + 0.12)
 	else
 		notes[1]:playNote(440, 0.12, 0.025)
 	end
