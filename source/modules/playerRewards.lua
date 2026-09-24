@@ -48,42 +48,42 @@ local collectableList = {
 		},
 		{
 			collectableType = "Boot",
-			value = 1,
+			value = 10,
 			chance = 55,
 		},
 	},
 	["rock2"] = {
 		{
-			collectableType = "Ring",
-			value = 500,
-			chance = 10,
+			collectableType = "Fossil",
+			value = 1000,
+			chance = 5,
 		},
 		{
-			collectableType = "Bone",
+			collectableType = "Amber",
+			value = 250,
+			chance = 45,
+		},
+		{
+			collectableType = "Book",
 			value = 100,
-			chance = 35,
-		},
-		{
-			collectableType = "Boot",
-			value = 1,
-			chance = 55,
+			chance = 60,
 		},
 	},
 	["rock3"] = {
 		{
-			collectableType = "Ring",
-			value = 500,
-			chance = 10,
+			collectableType = "???",
+			value = 99999,
+			chance = 1,
 		},
 		{
-			collectableType = "Bone",
-			value = 100,
-			chance = 35,
+			collectableType = "Element 67",
+			value = 9,
+			chance = 670,
 		},
 		{
-			collectableType = "Boot",
+			collectableType = "Dirt",
 			value = 1,
-			chance = 55,
+			chance = 90,
 		},
 	},
 }
