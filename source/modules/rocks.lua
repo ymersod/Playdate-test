@@ -131,7 +131,7 @@ function rock.CreateRock(context, rockType)
 	sprite.x = context.screenW / 2 - sprite.w / 2
 	sprite.y = (context.screenH / 2 - sprite.h / 2) + 30
 
-	rockCreated.heatToMatch = math.random(10, 100) -- TODO: TEMP
+	rockCreated.heatToMatch = math.random(10, 90) -- TODO: TEMP
 
 	return rockCreated
 end
