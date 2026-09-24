@@ -52,6 +52,50 @@ local findAt = -10000
 local findName = nil
 local impact = 0
 
+local collectablePopupCoroutines = {}
+
+---@param collectable Collectable
+local function startCollectablePopup(collectable)
+	local collectablePopup = {
+		text = tostring(collectable.collectableType),
+		value = collectable.value,
+		x = 300,
+		y = 240,
+		alpha = 0,
+	}
+
+	local routineKvP = {
+		routine = nil,
+		popupVals = collectablePopup,
+	}
+
+	local routine = coroutine.create(function()
+		-- // SLIDE IN
+		for i = 0, 1.5, 0.1 do
+			collectablePopup.alpha = i
+			collectablePopup.y = 240 - 30 * i
+			coroutine.yield()
+		end
+
+		-- // HOLD
+		for _ = 1, 45 do
+			coroutine.yield()
+		end
+
+		-- // SLIDE OUT
+		for i = 1.5, 0, -0.1 do
+			collectablePopup.alpha = i
+			collectablePopup.y = 240 - 30 * i
+			coroutine.yield()
+		end
+
+		collectablePopup = nil
+	end)
+	routineKvP.routine = routine
+
+	table.insert(collectablePopupCoroutines, routineKvP)
+end
+
 local function Text(text, x, y, font, white)
 	gfx.setFont(font)
 	gfx.setImageDrawMode(white and gfx.kDrawModeFillWhite or gfx.kDrawModeCopy)
@@ -124,9 +168,9 @@ function scene.Break(now, rock, reward, collectable)
 		name = reward.valuableType,
 		rare = rare,
 	})
+
 	if collectable then
-		findName = collectable.collectableType
-		findAt = now
+		startCollectablePopup(collectable)
 	end
 end
 
@@ -187,6 +231,7 @@ end
 
 local displayHeat = 0
 local visualTargetHeat = 0
+
 function scene.Draw(
 	rock,
 	values,
@@ -202,6 +247,7 @@ function scene.Draw(
 	rockCounter
 )
 	local now = pd.getCurrentTimeMilliseconds()
+
 	local rockX, rockY, screenX, screenY, flashing = feedback.GetOffsets(now)
 	gfx.clear(gfx.kColorBlack)
 	gfx.setDrawOffset(screenX, screenY)
@@ -329,12 +375,12 @@ function scene.Draw(
 
 	Text("HEAT", 4, 203, small, true)
 
-	Text("PWR:", 190, 6, small, true)
+	Text("PWR:", 220, 6, small, true)
 	local dmg = overheated and values.strength_mult * 2 or values.strength_mult
-	Text(tostring(dmg), 225, 3, body, true)
+	Text(tostring(dmg), 255, 3, body, true)
 
 	---@type RewardTable
-	local table = rewardsTable
+	local tablee = rewardsTable
 	local oreNames = { "Coal", "Topaz", "Diamond", "Emerald", "Ruby", "?" }
 	Text("ODDS", 359, 27, small, true)
 
@@ -348,7 +394,7 @@ function scene.Draw(
 		local t
 		if image then
 			image:drawScaled(361, y + 2, 0.5)
-			for _, value in ipairs(table) do
+			for _, value in ipairs(tablee) do
 				if value.valuableType == oreName then
 					t = value.chance
 					break
@@ -427,6 +473,34 @@ function scene.Draw(
 			gfx.drawLine(drop.x, drop.y - radius - 3, drop.x, drop.y - radius + 3)
 		end
 	end
+
+	for index = #collectablePopupCoroutines, 1, -1 do
+		local coroutineValue = collectablePopupCoroutines[index]
+		local routine = coroutineValue.routine
+		local popupVals = coroutineValue.popupVals
+		local text = popupVals.text
+		local value = popupVals.value
+		local x = popupVals.x - 80
+
+		local displayText = tostring(value) .. "$ " .. text .. " Found!"
+		local textWidth = small:getTextWidth(displayText)
+		local width = textWidth + 12
+
+		local success = coroutine.resume(routine)
+
+		gfx.setColor(gfx.kColorWhite)
+		gfx.fillRoundRect(x, popupVals.y, width, 22, 4)
+
+		gfx.setColor(gfx.kColorBlack)
+		gfx.drawRoundRect(x, popupVals.y, width, 22, 4)
+
+		Text(displayText, x + width / 2 - textWidth / 2, popupVals.y + 4, small)
+
+		if not success or coroutine.status(routine) == "dead" then
+			table.remove(collectablePopupCoroutines, index)
+		end
+	end
+
 	gfx.setDrawOffset(0, 0)
 end
 
