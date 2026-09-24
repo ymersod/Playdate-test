@@ -43,14 +43,14 @@ local function RockMask(image)
 end
 
 local rockFrames = {}
-for index = 1, 3 do
-	local path = "assets/textures/stone" .. index .. "/stone" .. index
+for index, stone in ipairs({ 3, 2, 1 }) do
+	local path = "assets/textures/stone" .. stone .. "/stone" .. stone
 	local frames = {
 		gfx.image.new(path .. "_default"),
 		gfx.image.new(path .. "_slightly_cracked"),
 		gfx.image.new(path .. "_cracked"),
 	}
-	if index == 1 then table.insert(frames, gfx.image.new(path .. "_broken")) end
+	if stone == 1 then table.insert(frames, gfx.image.new(path .. "_broken")) end
 	local mask = RockMask(frames[1])
 	if mask then
 		for _, frame in ipairs(frames) do frame:setMaskImage(mask) end
