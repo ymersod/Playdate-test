@@ -319,6 +319,7 @@ function playdate.update()
 		)
 		if collectableDrop then
 			museum.CollectableDropped(collectableDrop, collectables)
+			money += collectableDrop.value
 		end
 		miningScene.Break(now, activeRock, valuableDrop, collectableDrop)
 		activeRock = rock
@@ -336,7 +337,7 @@ function playdate.update()
 		upgradeMenu.Sound(rare and "reward" or "collect")
 	end
 
-	miningScene.Draw(
+	playerRewards.miningScene.Draw(
 		activeRock,
 		upgrade_mults,
 		rpsMover,
@@ -345,6 +346,8 @@ function playdate.update()
 		saveFailed,
 		rock.heatToMatch,
 		upgrade_mults.heatsinks_mult + activeRock.heatBuffer,
-		heat
+		heat,
+		rocks.UpdateRewardsTable(activeRock, upgrade_mults.drop_chances_mult),
+		playerRewards.GetCollectableChance(upgrade_mults.drop_chances_mult.collectable_mult)
 	)
 end

@@ -2,7 +2,7 @@
 ---@alias ScreenState "rocks" | "upgrades" | "museum" | "title"
 ---@alias RockType "rock1" | "rock2" | "rock3"
 ---@alias ValuableType "Diamond" | "Topaz" | "Coal" | "Emerald" | "Ruby"
----@alias CollectableType "Boot" | "Bone" | "Ring"
+---@alias CollectableType "Boot" | "Bone" | "Ring" | "Fossil" | "Amber" | "Book" | "Necronomicon" | "Element 67" | "Dirt"
 ---@alias DropValuesKvPs {valuableType: ValuableType, chance: number}
 ---@alias RockScreenState {rockAsNumberOnScreen: number}
 ---@alias GameContext {screenState: ScreenState, rockScreenState: RockScreenState, screenW: number, screenH: number}

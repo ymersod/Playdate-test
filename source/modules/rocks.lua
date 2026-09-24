@@ -142,7 +142,7 @@ end
 ---@param rock RockGeneric
 ---@param drop_chances_mult DropChanceMult
 ---@return RewardTable
-function UpdateRewardsTable(rock, drop_chances_mult)
+function rock.UpdateRewardsTable(rock, drop_chances_mult)
 	---@type RewardTable
 	local rewardTable = {}
 
@@ -191,7 +191,7 @@ function rock.CheckRocks(context, activeRock, rockSpawnTime, upgrade_mults)
 			local spawnedRock = rock.CreateRock(context, prevRockType)
 			return spawnedRock
 		end) ]]
-		local updatedRewardsTable = UpdateRewardsTable(activeRock, upgrade_mults.drop_chances_mult)
+		local updatedRewardsTable = rock.UpdateRewardsTable(activeRock, upgrade_mults.drop_chances_mult)
 
 		local spawnedRock = rock.CreateRock(context, activeRock.rockType)
 

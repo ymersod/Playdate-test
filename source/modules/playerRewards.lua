@@ -71,7 +71,7 @@ local collectableList = {
 	},
 	["rock3"] = {
 		{
-			collectableType = "???",
+			collectableType = "Necronomicon",
 			value = 99999,
 			chance = 1,
 		},
@@ -216,7 +216,7 @@ function playerRewards.ComputeRewards(rewardTable, ore_value_mult, rockMult)
 		error("Didnt find matching valuable")
 	end
 
-	rewardInfo.value = math.floor(rewardInfo.value * ore_value_mult)
+	rewardInfo.value = math.floor(rewardInfo.value * ore_value_mult * rockMult)
 
 	return rewardInfo
 end
@@ -224,6 +224,11 @@ end
 ---@return CollectableList
 function playerRewards.GetCollectableList()
 	return collectableList
+end
+
+---@return number
+function playerRewards.GetCollectableChance(collectMult)
+	return BASE_COLLECTABLE_CHANCE + collectMult
 end
 
 return playerRewards

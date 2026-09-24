@@ -24,6 +24,7 @@ local oreImages = {}
 for _, name in ipairs({ "Coal", "Topaz", "Diamond", "Emerald", "Ruby" }) do
 	oreImages[name] = gfx.image.new("assets/textures/ores/" .. string.lower(name))
 end
+
 local small = gfx.font.new("fonts/Roobert-10-Bold")
 local body = gfx.font.new("fonts/Roobert-11-Medium")
 local pieces = {}
@@ -184,7 +185,19 @@ end
 
 local displayHeat = 0
 local visualTargetHeat = 0
-function scene.Draw(rock, values, heat, overheated, affordable, saveFailed, targetHeat, heatBuffer, activeHeat)
+function scene.Draw(
+	rock,
+	values,
+	heat,
+	overheated,
+	affordable,
+	saveFailed,
+	targetHeat,
+	heatBuffer,
+	activeHeat,
+	rewardsTable,
+	collectMult
+)
 	local now = pd.getCurrentTimeMilliseconds()
 	local rockX, rockY, screenX, screenY, flashing = feedback.GetOffsets(now)
 	gfx.clear(gfx.kColorBlack)
@@ -203,6 +216,7 @@ function scene.Draw(rock, values, heat, overheated, affordable, saveFailed, targ
 		gfx.setColor(gfx.kColorWhite)
 		gfx.fillRect(199 + rumble, rodTop, 2, 220 - rodTop)
 	end
+
 	drill:draw(176 + rumble, drillTop)
 	local age = now - breakAt
 	local sprite = rock.sprite
@@ -301,9 +315,30 @@ function scene.Draw(rock, values, heat, overheated, affordable, saveFailed, targ
 
 	Text("HEAT", 4, 177, small, true)
 
-	Text("PWR", 366, 44, small, true)
+	Text("PWR:", 165, 6, small, true)
 	local dmg = overheated and values.strength_mult * 2 or values.strength_mult
-	Text(tostring(dmg), 377 - body:getTextWidth(tostring(values.strength_mult)) / 2, 64, body, true)
+	Text(tostring(dmg), 200, 3, body, true)
+
+	local BASE_COLLECTABLE_CHANCE
+	local oreNames = { "Coal", "Topaz", "Diamond", "Emerald", "Ruby", "?" }
+	Text("ODDS", 358, 27, small, true)
+	for index, oreName in ipairs(oreNames) do
+		local y = 45 + (index - 1) * 30
+		local image = oreImages[oreName]
+
+		gfx.setColor(gfx.kColorWhite)
+		gfx.fillRoundRect(358, y - 1, 38, 24, 4)
+
+		if image then
+			image:drawScaled(360, y + 2, 0.5)
+		else
+			Text(oreName, 363, y + 3, body)
+		end
+
+		--[[ 		Text(, 377, y + 3, small, false)
+ ]]
+	end
+
 	local hp = tostring(rock.health) .. "/" .. rock.maxHealth
 	gfx.setColor(gfx.kColorBlack)
 	gfx.fillRoundRect(200 - small:getTextWidth(hp) / 2 - 7, 30, small:getTextWidth(hp) + 14, 21, 3)
