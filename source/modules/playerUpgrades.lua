@@ -6,15 +6,15 @@ upgrades.catalog = {
 		key = "strength_level",
 		name = "Power",
 		prices = { 10, 40, 120, 300, 700 },
-		unit = "damage / turn",
+		unit = "damage / rotation",
 		description = "Hit harder.",
 	},
 	{
 		key = "heatsinks_level",
-		name = "Heatsinks",
+		name = "Heat banks",
 		prices = { 15, 50, 150, 350, 800 },
-		unit = "heat capacity",
-		description = "Crank longer.",
+		unit = "bigger heat bubble",
+		description = "Easier heat generation.",
 	},
 	{
 		key = "ore_value_level",
@@ -27,7 +27,7 @@ upgrades.catalog = {
 		key = "drop_chances_level",
 		name = "Rare finds",
 		prices = { 30, 100, 250, 600, 1200 },
-		unit = "rare ore chance",
+		unit = "better odds",
 		description = "More goodies!",
 	},
 }
@@ -48,11 +48,11 @@ end
 
 function upgrades.GetEffect(index, level)
 	if index == 1 then
-		return tostring(1 + level)
+		return tostring(2 ^ level)
 	elseif index == 2 then
-		return tostring(100 + 25 * level)
+		return "+" .. tostring(level * 2) .. ""
 	elseif index == 3 then
-		return string.format("%.2fx", 1 + 0.25 * level)
+		return string.format("%.2fx", tostring(2 ^ level))
 	end
 	return "+" .. tostring(10 * level) .. "%"
 end
