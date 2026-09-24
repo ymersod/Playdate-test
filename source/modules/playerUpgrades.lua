@@ -5,7 +5,7 @@ upgrades.catalog = {
 	{
 		key = "strength_level",
 		name = "Power",
-		prices = { 2, 25, 520, 2100, 20000 },
+		prices = { 2, 25, 520, 2100, 27000 },
 		unit = "damage / rotation",
 		description = "Hit harder.",
 	},
@@ -26,7 +26,7 @@ upgrades.catalog = {
 	{
 		key = "drop_chances_level",
 		name = "Rare finds",
-		prices = { 6, 50, 640, 2750, 29000 },
+		prices = { 6, 50, 640, 2750, 21000 },
 		unit = "better odds",
 		description = "More goodies!",
 	},
