@@ -315,28 +315,37 @@ function scene.Draw(
 
 	Text("HEAT", 4, 177, small, true)
 
-	Text("PWR:", 165, 6, small, true)
+	Text("PWR:", 190, 6, small, true)
 	local dmg = overheated and values.strength_mult * 2 or values.strength_mult
-	Text(tostring(dmg), 200, 3, body, true)
+	Text(tostring(dmg), 225, 3, body, true)
 
-	local BASE_COLLECTABLE_CHANCE
+	---@type RewardTable
+	local table = rewardsTable
 	local oreNames = { "Coal", "Topaz", "Diamond", "Emerald", "Ruby", "?" }
-	Text("ODDS", 358, 27, small, true)
+	Text("ODDS", 359, 27, small, true)
+
 	for index, oreName in ipairs(oreNames) do
 		local y = 45 + (index - 1) * 30
 		local image = oreImages[oreName]
 
 		gfx.setColor(gfx.kColorWhite)
-		gfx.fillRoundRect(358, y - 1, 38, 24, 4)
+		gfx.fillRoundRect(359, y - 1, 38, 24, 4)
 
+		local t
 		if image then
-			image:drawScaled(360, y + 2, 0.5)
+			image:drawScaled(361, y + 2, 0.5)
+			for _, value in ipairs(table) do
+				if value.valuableType == oreName then
+					t = value.chance
+					break
+				end
+			end
 		else
-			Text(oreName, 363, y + 3, body)
+			Text(oreName, 364, y + 3, body)
+			t = collectMult
 		end
 
-		--[[ 		Text(, 377, y + 3, small, false)
- ]]
+		Text(t, 378, y + 3, small, false)
 	end
 
 	local hp = tostring(rock.health) .. "/" .. rock.maxHealth

@@ -337,7 +337,7 @@ function playdate.update()
 		upgradeMenu.Sound(rare and "reward" or "collect")
 	end
 
-	playerRewards.miningScene.Draw(
+	miningScene.Draw(
 		activeRock,
 		upgrade_mults,
 		rpsMover,
