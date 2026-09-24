@@ -7,7 +7,7 @@
 
 ---@type RockGeneric
 local rock1 = {
-	health = 10,
+	health = 20,
 	rockType = "rock1",
 	rockName = "Marble",
 	heatBuffer = 20,

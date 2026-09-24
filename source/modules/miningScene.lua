@@ -253,14 +253,13 @@ function scene.Draw(rock, values, heat, overheated, affordable, saveFailed, targ
 	-- // SPEED BAR
 	Text("SPE.", 17, 48, small, true)
 	gfx.setColor(gfx.kColorWhite)
-	gfx.drawRoundRect(17, 65, 12, 108, 3)
+	gfx.drawRoundRect(28, 65, 12, 108, 3)
 
 	displayHeat = displayHeat or 0
 	displayHeat = displayHeat + (heat - displayHeat) * 0.15
 
-	print(targetHeat)
 	local fill = math.floor(math.min(1, displayHeat) * 102)
-	gfx.fillRect(20, 170 - fill, 6, fill)
+	gfx.fillRect(31, 170 - fill, 6, fill)
 
 	-- // SPEED TARGET
 	visualTargetHeat = visualTargetHeat or targetHeat
@@ -288,18 +287,19 @@ function scene.Draw(rock, values, heat, overheated, affordable, saveFailed, targ
 	end
 
 	gfx.setColor(gfx.kColorWhite)
-	gfx.drawRoundRect(15, curHeatY - 2, 16, heatTargetVisualH + 4, 4)
+	gfx.drawRoundRect(26, curHeatY - 2, 16, heatTargetVisualH + 4, 4)
 
 	gfx.setColor(gfx.kColorBlack)
-	gfx.drawRoundRect(17, curHeatY, 12, heatTargetVisualH, 2)
+	gfx.drawRoundRect(28, curHeatY, 12, heatTargetVisualH, 2)
 
 	-- // HEAT-BAR
 	gfx.setColor(gfx.kColorWhite)
-	gfx.drawRoundRect(4, 75, 10, 108, 3)
+	gfx.drawRoundRect(4, 65, 14, 108, 3)
 
-	local fill = math.floor((activeHeat / 100) * 102)
-	gfx.fillRect(6, 181 - fill, 6, fill)
-	Text("HEAT", 4, 185, small, true)
+	local fill = math.floor(math.min(1, activeHeat / 100) * 102)
+	gfx.fillRect(6, 173 - fill, 10, fill)
+
+	Text("HEAT", 4, 177, small, true)
 
 	Text("PWR", 366, 44, small, true)
 	local dmg = overheated and values.strength_mult * 2 or values.strength_mult
