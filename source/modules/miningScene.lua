@@ -196,7 +196,8 @@ function scene.Draw(
 	heatBuffer,
 	activeHeat,
 	rewardsTable,
-	collectMult
+	collectMult,
+	rockCounter
 )
 	local now = pd.getCurrentTimeMilliseconds()
 	local rockX, rockY, screenX, screenY, flashing = feedback.GetOffsets(now)
@@ -264,16 +265,25 @@ function scene.Draw(
 	local name = "< " .. rock.rockName .. " >"
 	Text(name, 388 - body:getTextWidth(name), 2, body, true)
 
+	--[[ 	gfx.setColor(gfx.kColorWhite)
+	gfx.fillRoundRect(2, 27, 44, 39, 4)
+
+	gfx.setColor(gfx.kColorBlack)
+	gfx.drawRoundRect(2, 27, 44, 39, 4) ]]
+
+	Text("ROKS'", 5, 30, small, true)
+	Text(rockCounter, 5, 45, small, true)
+
 	-- // SPEED BAR
-	Text("SPE.", 17, 48, small, true)
+	Text("SPE.", 17, 74, small, true)
 	gfx.setColor(gfx.kColorWhite)
-	gfx.drawRoundRect(28, 65, 12, 108, 3)
+	gfx.drawRoundRect(28, 91, 12, 108, 3)
 
 	displayHeat = displayHeat or 0
 	displayHeat = displayHeat + (heat - displayHeat) * 0.15
 
 	local fill = math.floor(math.min(1, displayHeat) * 102)
-	gfx.fillRect(31, 170 - fill, 6, fill)
+	gfx.fillRect(31, 196 - fill, 6, fill)
 
 	-- // SPEED TARGET
 	visualTargetHeat = visualTargetHeat or targetHeat
@@ -282,8 +292,8 @@ function scene.Draw(
 	local calced = 108 / 100 * heatBuffer * 2
 	local heatTargetVisualH = calced
 
-	local heatMaxY = 65
-	local heatMinY = 65 + 108
+	local heatMaxY = 91
+	local heatMinY = 91 + 108
 
 	local diff = heatMinY - heatMaxY
 	local heatDiff = diff * (visualTargetHeat / 100)
@@ -308,12 +318,12 @@ function scene.Draw(
 
 	-- // HEAT-BAR
 	gfx.setColor(gfx.kColorWhite)
-	gfx.drawRoundRect(4, 65, 14, 108, 3)
+	gfx.drawRoundRect(4, 91, 14, 108, 3)
 
 	local fill = math.floor(math.min(1, activeHeat / 100) * 102)
-	gfx.fillRect(6, 173 - fill, 10, fill)
+	gfx.fillRect(6, 199 - fill, 10, fill)
 
-	Text("HEAT", 4, 177, small, true)
+	Text("HEAT", 4, 203, small, true)
 
 	Text("PWR:", 190, 6, small, true)
 	local dmg = overheated and values.strength_mult * 2 or values.strength_mult

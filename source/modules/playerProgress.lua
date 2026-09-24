@@ -2,7 +2,7 @@
 local progress = {}
 local saveName <const> = "upgrades"
 
----@return PlayerLevels, number, Collectable[]
+---@return PlayerLevels, number, Collectable[], number
 function progress.Load(upgrades)
 	local ok, saved = pcall(playdate.datastore.read, saveName)
 	if not ok or type(saved) ~= "table" then
@@ -26,15 +26,22 @@ function progress.Load(upgrades)
 	---@type Collectable[]
 	local collectables = type(saved.collectables) == "table" and saved.collectables or {}
 
-	return cleanLevels, math.max(0, math.floor(money)), collectables
+	-- rocks killed loacd
+	local rocksKilled = saved.rocksKilled
+	if type(rocksKilled) ~= "number" or rocksKilled ~= rocksKilled or rocksKilled == math.huge then
+		rocksKilled = 0
+	end
+
+	return cleanLevels, math.max(0, math.floor(money)), collectables, rocksKilled
 end
 
-function progress.Save(levels, money, collectables)
+function progress.Save(levels, money, collectables, rocksKilled)
 	local ok, result = pcall(playdate.datastore.write, {
 		version = 1,
 		levels = levels,
 		money = money,
 		collectables = collectables,
+		rocksKilled = rocksKilled,
 	}, saveName)
 	return ok and result ~= false
 end
@@ -45,8 +52,10 @@ function progress.Reset(upgrades)
 		levels[upgrade.key] = 0
 	end
 	local collectables = {}
-	if not progress.Save(levels, 0, collectables) then return nil end
-	return levels, 0, collectables
+	if not progress.Save(levels, 0, collectables) then
+		return nil
+	end
+	return levels, 0, collectables, 0
 end
 
 return progress

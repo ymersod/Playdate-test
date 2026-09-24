@@ -56,6 +56,8 @@ local playerLevels
 local money
 ---@type Collectable[]
 local collectables
+---@type number
+local rockCounter
 
 ---@type GameContext
 local context = {
@@ -71,7 +73,7 @@ local saveFailed = false
 local gameStarted = false
 
 local function SaveProgress()
-	saveFailed = not playerProgress.Save(playerLevels, money, collectables)
+	saveFailed = not playerProgress.Save(playerLevels, money, collectables, rockCounter)
 end
 
 local function ResetPresentation()
@@ -192,13 +194,13 @@ function playdate.AButtonDown()
 	if context.screenState == "title" then
 		local action = titleMenu.Accept()
 		if action == "reset" then
-			local levels, balance, finds = playerProgress.Reset(playerUpgrades)
+			local levels, balance, finds, rocksKilled = playerProgress.Reset(playerUpgrades)
 			if not levels then
 				titleMenu.SaveFailed()
 				upgradeMenu.Sound("poor")
 				return
 			end
-			playerLevels, money, collectables = levels, balance, finds
+			playerLevels, money, collectables, rocksKilled = levels, balance, finds, rocksKilled
 			saveFailed = false
 			SpawnRocks()
 			mineRock.Reset()
@@ -237,7 +239,7 @@ end
 
 -- //GAME FUNCTIONS//
 function Start()
-	playerLevels, money, collectables = playerProgress.Load(playerUpgrades) -- LOAD
+	playerLevels, money, collectables, rockCounter = playerProgress.Load(playerUpgrades) -- LOAD
 	SpawnRocks()
 
 	museum.Start(playerRewards.GetCollectableList())
@@ -321,6 +323,7 @@ function playdate.update()
 			museum.CollectableDropped(collectableDrop, collectables)
 			money += collectableDrop.value
 		end
+		rockCounter += 1
 		miningScene.Break(now, activeRock, valuableDrop, collectableDrop)
 		activeRock = rock
 		upgradeMenu.Sound("break")
@@ -348,6 +351,7 @@ function playdate.update()
 		upgrade_mults.heatsinks_mult + activeRock.heatBuffer,
 		heat,
 		rocks.UpdateRewardsTable(activeRock, upgrade_mults.drop_chances_mult),
-		playerRewards.GetCollectableChance(upgrade_mults.drop_chances_mult.collectable_mult)
+		playerRewards.GetCollectableChance(upgrade_mults.drop_chances_mult.collectable_mult),
+		rockCounter
 	)
 end
