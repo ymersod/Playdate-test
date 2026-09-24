@@ -3,8 +3,8 @@ local gfx <const> = pd.graphics
 local feedback = import("modules/rockFeedback")
 local scene = {}
 local background = gfx.image.new("assets/textures/ui/backgroundMineshaftBlackBorderWhiteOutline")
-local idleDrill = gfx.image.new("assets/textures/ui/drill"):scaledImage(0.75)
-local hotDrill = gfx.image.new("assets/textures/ui/drill_blank"):scaledImage(0.75)
+local idleDrill = gfx.image.new("assets/textures/ui/drill"):scaledImage(0.5)
+local hotDrill = gfx.image.new("assets/textures/ui/drill_blank"):scaledImage(0.5)
 local drillFrames = {
 	gfx.image.new("assets/textures/ui/drlil_animation1"),
 	gfx.image.new("assets/textures/ui/drill_animation2"),
@@ -12,7 +12,7 @@ local drillFrames = {
 	gfx.image.new("assets/textures/ui/drill_animation4"),
 }
 for index, image in ipairs(drillFrames) do
-	drillFrames[index] = image:scaledImage(0.75)
+	drillFrames[index] = image:scaledImage(0.5)
 end
 local rockFrames = {
 	gfx.image.new("assets/textures/stone1/stone1_default"),
@@ -41,60 +41,16 @@ end
 
 local particles = {}
 local drops = {}
-local drillY, drillVelocity = 162, 0
+local drillY, drillVelocity = 176, 0
 local kick, kickVelocity = 0, 0
 local activity, phase, spin = 0, 0, 0
 local visibleMoney = 0
 local collectedAt, collectedValue = -10000, 0
 local collectedName = ""
+local pendingValue, pendingName = 0, ""
 local breakAt = -10000
-local findAt = -10000
-local findName = nil
+local finds = {}
 local impact = 0
-
-local collectablePopupCoroutines = {}
-
----@param collectable Collectable
-local function startCollectablePopup(collectable)
-	local collectablePopup = {
-		text = tostring(collectable.collectableType),
-		value = collectable.value,
-		x = 300,
-		y = 240,
-		alpha = 0,
-	}
-
-	local routineKvP = {
-		routine = nil,
-		popupVals = collectablePopup,
-	}
-
-	local routine = coroutine.create(function()
-		-- // SLIDE IN
-		for i = 0, 1.5, 0.1 do
-			collectablePopup.alpha = i
-			collectablePopup.y = 240 - 30 * i
-			coroutine.yield()
-		end
-
-		-- // HOLD
-		for _ = 1, 45 do
-			coroutine.yield()
-		end
-
-		-- // SLIDE OUT
-		for i = 1.5, 0, -0.1 do
-			collectablePopup.alpha = i
-			collectablePopup.y = 240 - 30 * i
-			coroutine.yield()
-		end
-
-		collectablePopup = nil
-	end)
-	routineKvP.routine = routine
-
-	table.insert(collectablePopupCoroutines, routineKvP)
-end
 
 local function Text(text, x, y, font, white)
 	gfx.setFont(font)
@@ -114,18 +70,20 @@ function scene.Reset(money)
 	feedback.Reset()
 	particles = {}
 	drops = {}
-	drillY, drillVelocity = 162, 0
+	drillY, drillVelocity = 176, 0
 	kick, kickVelocity = 0, 0
 	activity, phase, spin = 0, 0, 0
 	visibleMoney = money
-	collectedAt, breakAt, findAt = -10000, -10000, -10000
-	collectedValue, findName = 0, nil
+	collectedAt, breakAt = -10000, -10000
+	collectedValue = 0
+	pendingValue, pendingName = 0, ""
+	finds = {}
 end
 
 function scene.Hit(now, rock)
 	feedback.Hit(now)
 	breakAt = -10000
-	kick, kickVelocity = -6, 0
+	kick, kickVelocity = -3, 0
 	impact += 1
 	local x = rock.sprite.x + 64
 	local y = rock.sprite.y + 91
@@ -135,11 +93,11 @@ function scene.Hit(now, rock)
 	end
 end
 
-function scene.Break(now, rock, reward, collectable)
+function scene.Break(now, rock, reward)
 	feedback.Break(now)
 	breakAt = now
 	local rare = reward.valuableType ~= "Coal"
-	kick, kickVelocity = rare and -30 or -23, 0
+	kick, kickVelocity = rare and -12 or -8, 0
 	local x, y = rock.sprite.x + 64, rock.sprite.y + 58
 	for index = 1, 3 do
 		local direction = index % 2 == 0 and -1 or 1
@@ -168,9 +126,15 @@ function scene.Break(now, rock, reward, collectable)
 		name = reward.valuableType,
 		rare = rare,
 	})
+end
 
-	if collectable then
-		startCollectablePopup(collectable)
+function scene.Find(collectable, discovered)
+	visibleMoney += collectable.value
+	if discovered then
+		table.insert(finds, { name = collectable.collectableType, value = collectable.value, age = 0 })
+	else
+		pendingValue += collectable.value
+		pendingName = pendingValue == collectable.value and collectable.collectableType or "Loot"
 	end
 end
 
@@ -180,12 +144,12 @@ function scene.Update(delta, change, canDrill, now)
 	local turnSpeed = canDrill and math.max(-1440, math.min(1440, change / math.max(delta, 1 / 120))) or 0
 	spin += (turnSpeed - spin) * (1 - math.exp(-delta * 22))
 	phase = (phase + spin * delta / 24) % #drillFrames
-	local target = 162 - activity * 30
+	local target = 176 - activity * 10
 	local steps = math.max(1, math.ceil(delta * 60))
 	local step = delta / steps
 	for _ = 1, steps do
 		drillVelocity += ((target - drillY) * 180 - drillVelocity * 24) * step
-		drillY = math.max(128, math.min(176, drillY + drillVelocity * step))
+		drillY = math.max(166, math.min(180, drillY + drillVelocity * step))
 		kickVelocity += (-kick * 220 - kickVelocity * 18) * step
 		kick += kickVelocity * step
 	end
@@ -199,7 +163,9 @@ function scene.Update(delta, change, canDrill, now)
 			table.remove(particles, index)
 		end
 	end
-	local collected, rare = 0, false
+	local collected, rare = pendingValue, false
+	if collected > 0 then collectedName = pendingName end
+	pendingValue, pendingName = 0, ""
 	for index = #drops, 1, -1 do
 		local drop = drops[index]
 		drop.age += delta
@@ -217,7 +183,7 @@ function scene.Update(delta, change, canDrill, now)
 		if drop.age >= 0.86 then
 			visibleMoney += drop.value
 			collected += drop.value
-			collectedName = collected == drop.value and drop.name or "Ore"
+			collectedName = collected == drop.value and drop.name or "Loot"
 			rare = rare or drop.rare
 			table.remove(drops, index)
 		end
@@ -226,7 +192,19 @@ function scene.Update(delta, change, canDrill, now)
 		collectedAt = now
 		collectedValue = collected
 	end
-	return collected, rare
+	local findSound
+	local find = finds[1]
+	if find then
+		local previousAge = find.age
+		find.age += delta
+		if previousAge < 0.12 and find.age >= 0.12 then
+			findSound = "discovery"
+		end
+		if find.age >= 3.2 then
+			table.remove(finds, 1)
+		end
+	end
+	return collected, rare, findSound
 end
 
 local displayHeat = 0
@@ -258,7 +236,7 @@ function scene.Draw(
 		or activity > 0.08 and drillFrames[math.floor(phase) % #drillFrames + 1]
 		or idleDrill
 	local drillTop = math.floor(drillY + kick)
-	local rodTop = drillTop + 68
+	local rodTop = drillTop + 46
 	if rodTop < 220 then
 		gfx.setColor(gfx.kColorBlack)
 		gfx.fillRect(197 + rumble, rodTop, 6, 220 - rodTop)
@@ -266,7 +244,6 @@ function scene.Draw(
 		gfx.fillRect(199 + rumble, rodTop, 2, 220 - rodTop)
 	end
 
-	drill:draw(176 + rumble, drillTop)
 	local age = now - breakAt
 	local sprite = rock.sprite
 	if age < 75 then
@@ -291,6 +268,7 @@ function scene.Draw(
 		rockFrames[frame]:draw(sprite.x + rockX, math.floor(sprite.y + rockY - arrival * arrival * 18))
 		gfx.setImageDrawMode(gfx.kDrawModeCopy)
 	end
+	drill:draw(184 + rumble, drillTop)
 	for _, particle in ipairs(particles) do
 		if particle.image then
 			particle.image:drawRotated(math.floor(particle.x), math.floor(particle.y), particle.age * particle.vx * 3)
@@ -417,7 +395,10 @@ function scene.Draw(
 
 	Text(hp, 200 - small:getTextWidth(hp) / 2, 56, small)
 	local prompt = affordable > 0 and "A Upgrades (" .. affordable .. ")" or "A Upgrades"
-	Text(saveFailed and "Save failed - retry in Menu" or prompt, 10, 224, small, true)
+	Text(saveFailed and "Save failed" or prompt, 10, 224, small, true)
+	gfx.setColor(gfx.kColorWhite)
+	gfx.fillTriangle(196, 226, 204, 226, 200, 232)
+	Text("Museum", 209, 224, small, true)
 	Text("B Title", 350, 224, small, true)
 	if not saveFailed and (overheated or pd.isCrankDocked()) then
 		if overheated then
@@ -453,14 +434,10 @@ function scene.Draw(
 			Text(hint, 218 - width / 2, 254, small, true)
 		end
 	end
-	if now - findAt < 2200 or now - collectedAt < 850 then
-		local found = now - findAt < 2200
-		local text = found and "FOUND: " .. string.upper(findName)
-			or "+$" .. collectedValue .. " " .. string.upper(collectedName)
+	if now - collectedAt < 850 then
+		local text = "+$" .. collectedValue .. " " .. string.upper(collectedName)
 		local x = math.max(88, body:getTextWidth(wallet) + 28)
-		if x + small:getTextWidth(text) > 268 then
-			text = found and string.upper(findName) or "+$" .. collectedValue
-		end
+		if x + small:getTextWidth(text) > 218 then text = "+$" .. collectedValue end
 		Text(text, x, 5, small, true)
 	end
 	for _, drop in ipairs(drops) do
@@ -474,34 +451,37 @@ function scene.Draw(
 		end
 	end
 
-	for index = #collectablePopupCoroutines, 1, -1 do
-		local coroutineValue = collectablePopupCoroutines[index]
-		local routine = coroutineValue.routine
-		local popupVals = coroutineValue.popupVals
-		local text = popupVals.text
-		local value = popupVals.value
-		local x = popupVals.x - 80
-
-		local displayText = tostring(value) .. "$ " .. text .. " Found!"
-		local textWidth = small:getTextWidth(displayText)
-		local width = textWidth + 12
-
-		local success = coroutine.resume(routine)
-
-		gfx.setColor(gfx.kColorWhite)
-		gfx.fillRoundRect(x, popupVals.y, width, 22, 4)
-
+	gfx.setDrawOffset(0, 0)
+	local find = finds[1]
+	if find and find.age >= 0.12 then
+		local duration = 3.2
+		local enter = math.min(1, (find.age - 0.12) / 0.24)
+		local leave = math.max(0, (find.age - duration + 0.22) / 0.22)
+		local y = math.floor(31 - (1 - enter) ^ 3 * 125 - leave * leave * 125)
 		gfx.setColor(gfx.kColorBlack)
-		gfx.drawRoundRect(x, popupVals.y, width, 22, 4)
-
-		Text(displayText, x + width / 2 - textWidth / 2, popupVals.y + 4, small)
-
-		if not success or coroutine.status(routine) == "dead" then
-			table.remove(collectablePopupCoroutines, index)
+		gfx.fillRoundRect(60, y + 4, 284, 84, 6)
+		gfx.setColor(gfx.kColorWhite)
+		gfx.fillRoundRect(56, y, 284, 84, 6)
+		gfx.setColor(gfx.kColorBlack)
+		gfx.drawRoundRect(56, y, 284, 84, 6)
+		gfx.fillRoundRect(61, y + 5, 274, 20, 3)
+		local label = "NEW COLLECTIBLE!"
+		Text(label, 198 - small:getTextWidth(label) / 2, y + 8, small, true)
+		Text(find.name, 198 - heading:getTextWidth(find.name) / 2, y + 29, heading)
+		local detail = "+$" .. find.value .. "   Added to museum"
+		Text(detail, 198 - small:getTextWidth(detail) / 2, y + 64, small)
+		if find.age < 0.8 then
+			local radius = 10 + (find.age - 0.12) * 26
+			for side = -1, 1, 2 do
+				local x = 198 + side * 125
+				gfx.setColor(gfx.kColorBlack)
+				gfx.drawLine(x - 5, y + 42, x + 5, y + 42)
+				gfx.drawLine(x, y + 37, x, y + 47)
+				gfx.setColor(gfx.kColorWhite)
+				gfx.drawLine(x, y - radius, x, y - radius + 5)
+			end
 		end
 	end
-
-	gfx.setDrawOffset(0, 0)
 end
 
 return scene

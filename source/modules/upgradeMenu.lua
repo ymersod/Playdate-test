@@ -15,10 +15,19 @@ local openedAt = 0
 local displayedMoney = 0
 local muted = false
 local notes = {}
+local findNotes = {}
+local icons = {
+	gfx.image.new("assets/textures/ui/upgradeMenu/power"),
+	gfx.image.new("assets/textures/ui/upgradeMenu/heatbank"),
+	gfx.image.new("assets/textures/ui/upgradeMenu/oreValue1"),
+	gfx.image.new("assets/textures/ui/upgradeMenu/rareFinds"),
+}
 
 for index = 1, 3 do
 	notes[index] = pd.sound.synth.new(pd.sound.kWaveTriangle)
 	notes[index]:setADSR(0.005, 0.06, 0.25, 0.08)
+	findNotes[index] = pd.sound.synth.new(pd.sound.kWaveSine)
+	findNotes[index]:setADSR(0.005, 0.15, 0.3, 0.2)
 end
 
 local function Text(text, x, y, font, inverted)
@@ -32,27 +41,10 @@ local function RightText(text, x, y, font, inverted)
 	Text(text, x - font:getTextWidth(text), y, font, inverted)
 end
 
-local function Icon(index, x, y)
-	gfx.setLineWidth(2)
-	if index == 1 then
-		gfx.drawLine(x + 11, y, x + 2, y + 11)
-		gfx.drawLine(x + 2, y + 11, x + 11, y + 11)
-		gfx.drawLine(x + 11, y + 11, x + 5, y + 21)
-	elseif index == 2 then
-		for fin = 0, 2 do
-			gfx.drawLine(x + fin * 6, y + 2, x + fin * 6, y + 19)
-		end
-		gfx.drawLine(x, y + 7, x + 12, y + 7)
-		gfx.drawLine(x, y + 14, x + 12, y + 14)
-	elseif index == 3 then
-		gfx.drawRect(x, y + 12, 16, 8)
-		gfx.drawRect(x + 3, y + 2, 10, 8)
-	else
-		gfx.drawPolygon(x + 8, y, x + 17, y + 8, x + 8, y + 21, x - 1, y + 8, x + 8, y)
-		gfx.drawLine(x - 1, y + 8, x + 17, y + 8)
-		gfx.drawLine(x + 8, y, x + 8, y + 21)
-	end
-	gfx.setLineWidth(1)
+local function Icon(index, x, y, inverted)
+	gfx.setImageDrawMode(inverted and gfx.kDrawModeInverted or gfx.kDrawModeCopy)
+	icons[index]:draw(x, y)
+	gfx.setImageDrawMode(gfx.kDrawModeCopy)
 end
 
 function menu.SetMuted(value)
@@ -66,6 +58,10 @@ function menu.Sound(kind)
 	if kind == "bought" then
 		for index, pitch in ipairs({ 523, 659, 988 }) do
 			notes[index]:playNote(pitch, 0.22, 0.1, pd.sound.getCurrentTime() + (index - 1) * 0.065)
+		end
+	elseif kind == "discovery" then
+		for index, pitch in ipairs({ 784, 1047, 1568 }) do
+			findNotes[index]:playNote(pitch, 0.24, 0.22, pd.sound.getCurrentTime() + (index - 1) * 0.1)
 		end
 	elseif kind == "poor" or kind == "maxed" then
 		notes[1]:playNote(147, 0.18, 0.07)
@@ -160,7 +156,7 @@ function menu.Draw(upgrades, levels, money, saveFailed)
 			gfx.drawLine(x + 33, y + 29, 385, y + 29)
 		end
 		gfx.setColor(chosen and gfx.kColorWhite or gfx.kColorBlack)
-		Icon(index, x + 9, y + 4)
+		Icon(index, x + 9, y + 6, chosen)
 		Text(upgrade.name, x + 36, y + 4, body, chosen)
 		for pip = 1, #upgrade.prices do
 			local px = x + 183 + (pip - 1) * 17

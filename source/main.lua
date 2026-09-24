@@ -119,6 +119,13 @@ local function OpenUpgrades()
 	upgradeMenu.Open(money)
 end
 
+local function OpenMuseum()
+	context.screenState = "museum"
+	ResetPresentation()
+	museum.Open()
+	upgradeMenu.Sound("move")
+end
+
 pd.gameWillTerminate = SaveProgress
 local function PauseGame()
 	ResetPresentation()
@@ -179,6 +186,9 @@ end
 function playdate.upButtonDown()
 	if context.screenState == "upgrades" then
 		upgradeMenu.Select(-1)
+	elseif context.screenState == "museum" then
+		museum.Select(-1)
+		upgradeMenu.Sound("move")
 	elseif context.screenState == "title" and titleMenu.Select() then
 		upgradeMenu.Sound("move")
 	end
@@ -187,6 +197,11 @@ end
 function playdate.downButtonDown()
 	if context.screenState == "upgrades" then
 		upgradeMenu.Select(1)
+	elseif context.screenState == "museum" then
+		museum.Select(1)
+		upgradeMenu.Sound("move")
+	elseif context.screenState == "rocks" then
+		OpenMuseum()
 	elseif context.screenState == "title" and titleMenu.Select() then
 		upgradeMenu.Sound("move")
 	end
@@ -230,7 +245,7 @@ function playdate.AButtonDown()
 end
 
 function playdate.BButtonDown()
-	if context.screenState == "upgrades" then
+	if context.screenState == "upgrades" or context.screenState == "museum" then
 		context.screenState = "rocks"
 		ResetPresentation()
 		upgradeMenu.Sound("move")
@@ -249,7 +264,7 @@ function Start()
 	local upgrade_mults = playerUpgrades.ComputeValues(playerLevels)
 	SpawnRocks(upgrade_mults.heatsinks_mult)
 
-	museum.Start(playerRewards.GetCollectableList())
+	museum.Start(playerRewards.GetCollectableList(), aliveRocks)
 	ResetPresentation()
 	titleMenu.Open(HasProgress())
 end
@@ -277,6 +292,11 @@ function playdate.update()
 	if context.screenState == "upgrades" then
 		upgradeMenu.Crank(change)
 		upgradeMenu.Draw(playerUpgrades, playerLevels, money, saveFailed)
+		return
+	end
+	if context.screenState == "museum" then
+		if museum.Crank(change) then upgradeMenu.Sound("move") end
+		museum.Draw(collectables, saveFailed)
 		return
 	end
 	gfx.clear()
@@ -328,11 +348,12 @@ function playdate.update()
 			activeRock.rockType
 		)
 		if collectableDrop then
-			museum.CollectableDropped(collectableDrop, collectables)
+			local discovered = museum.CollectableDropped(collectableDrop, collectables)
+			miningScene.Find(collectableDrop, discovered)
 			money += collectableDrop.value
 		end
 		rockCounter += 1
-		miningScene.Break(now, activeRock, valuableDrop, collectableDrop)
+		miningScene.Break(now, activeRock, valuableDrop)
 		activeRock = rock
 		upgradeMenu.Sound("break")
 		SaveProgress()
@@ -343,8 +364,10 @@ function playdate.update()
 	end
 
 	-- // RENDER //
-	local collected, rare = miningScene.Update(delta, change, not pd.isCrankDocked() and not overheated, now)
-	if collected > 0 then
+	local collected, rare, findSound = miningScene.Update(delta, change, not pd.isCrankDocked() and not overheated, now)
+	if findSound then
+		upgradeMenu.Sound(findSound)
+	elseif collected > 0 then
 		upgradeMenu.Sound(rare and "reward" or "collect")
 	end
 
