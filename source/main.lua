@@ -308,7 +308,8 @@ function playdate.update()
 	end
 
 	-- // COMPUTE DROPS //
-	local valuableDrop = playerRewards.ComputeRewards(rewardTable, upgrade_mults.ore_value_mult)
+	local valuableDrop =
+		playerRewards.ComputeRewards(rewardTable, upgrade_mults.ore_value_mult, rock.rockValueMultiplier)
 	if valuableDrop then
 		money += valuableDrop.value
 		local collectableDrop = playerRewards.ComputeCollectable(

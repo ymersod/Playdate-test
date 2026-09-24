@@ -88,6 +88,7 @@ function menu.Draw(money, saveFailed)
 	if canContinue then
 		Center("$" .. money .. " saved", 135, small)
 	end
+
 	local count = canContinue and 2 or 1
 	for index = 1, count do
 		local y = 159 + (index - 1) * 31

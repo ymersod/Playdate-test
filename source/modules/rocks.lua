@@ -12,6 +12,7 @@ local rock1 = {
 	rockName = "Marble",
 	heatBuffer = 20,
 	rockTypeNumber = 1,
+	rockValueMultiplier = 1,
 	dropTable = {
 		{
 			valuableType = "Coal",
@@ -42,6 +43,7 @@ local rock2 = {
 	rockName = "Slate",
 	heatBuffer = 10,
 	rockTypeNumber = 2,
+	rockValueMultiplier = 2,
 	dropTable = {
 		{
 			valuableType = "Coal",
@@ -73,6 +75,7 @@ local rock3 = {
 	rockName = "Granite",
 	rockTypeNumber = 3,
 	heatBuffer = 5,
+	rockValueMultiplier = 4,
 	dropTable = {
 		{
 			valuableType = "Coal",

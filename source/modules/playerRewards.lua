@@ -153,8 +153,9 @@ end
 
 ---@param rewardTable RewardTable?
 ---@param ore_value_mult number
+---@param rockMult number
 ---@return RewardInfo?
-function playerRewards.ComputeRewards(rewardTable, ore_value_mult)
+function playerRewards.ComputeRewards(rewardTable, ore_value_mult, rockMult)
 	if not rewardTable then
 		return
 	end
