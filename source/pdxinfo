@@ -1,6 +1,6 @@
-name=Rock slugger
+name=Cranky dwarf
 author=Daniel G., Hugo & Simon
-description=Test
-bundleID=com.yournamehere.TestName
-version=1.0
-buildNumber=1
+description=Crank on brother
+bundleID=com.cranky.dwarf
+version=0.1
+buildNumber=67
