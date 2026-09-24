@@ -350,12 +350,12 @@ function scene.Draw(
 
 	local hp = tostring(rock.health) .. "/" .. rock.maxHealth
 	gfx.setColor(gfx.kColorBlack)
-	gfx.fillRoundRect(200 - small:getTextWidth(hp) / 2 - 7, 30, small:getTextWidth(hp) + 14, 21, 3)
+	gfx.fillRoundRect(200 - small:getTextWidth(hp) / 2 - 7, 52, small:getTextWidth(hp) + 14, 21, 3)
 
 	gfx.setColor(gfx.kColorWhite)
-	gfx.fillRoundRect(200 - small:getTextWidth(hp) / 2 - 6, 31, small:getTextWidth(hp) + 12, 19, 3)
+	gfx.fillRoundRect(200 - small:getTextWidth(hp) / 2 - 6, 53, small:getTextWidth(hp) + 12, 19, 3)
 
-	Text(hp, 200 - small:getTextWidth(hp) / 2, 34, small)
+	Text(hp, 200 - small:getTextWidth(hp) / 2, 56, small)
 	local prompt = affordable > 0 and "A Upgrades (" .. affordable .. ")" or "A Upgrades"
 	Text(saveFailed and "Save failed - retry in Menu" or prompt, 10, 224, small, true)
 	Text("B Title", 350, 224, small, true)
