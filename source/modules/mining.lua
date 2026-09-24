@@ -65,14 +65,14 @@ function mining.IsInHeatZone(heatToMatch, heatsinks_mult, rpsMover, heatBuffer)
 	return false
 end
 
-local heat_zone_speed = 100
+local heat_zone_speed = 10
 ---@param isInHeatZone boolean
 ---@param delta number
 ---@return number, boolean
 function mining.UpdateHeat(isInHeatZone, delta)
 	local increment = heat_zone_speed * delta
 	if overheated then
-		increment = increment * 0.1
+		increment = increment * 1.5
 	end
 
 	if not isInHeatZone or overheated then
