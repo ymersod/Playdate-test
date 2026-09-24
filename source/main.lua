@@ -94,11 +94,11 @@ local function HasProgress()
 	return false
 end
 
-local function SpawnRocks()
+local function SpawnRocks(heatsinks_mult)
 	aliveRocks = {}
 	context.rockScreenState.rockAsNumberOnScreen = 1
 	for _, value in ipairs(rockList) do
-		local rock = rocks.CreateRock(context, value)
+		local rock = rocks.CreateRock(context, value, heatsinks_mult)
 		if not rock then
 			error("Failed creating rock")
 		end
@@ -158,6 +158,8 @@ function OnRockChange(direction)
 		nextRock = 1
 	end
 
+	mineRock.Reset()
+
 	context.rockScreenState.rockAsNumberOnScreen = nextRock
 	SetActiveRock()
 end
@@ -202,7 +204,10 @@ function playdate.AButtonDown()
 			end
 			playerLevels, money, collectables, rocksKilled = levels, balance, finds, rocksKilled
 			saveFailed = false
-			SpawnRocks()
+
+			local upgrade_mults = playerUpgrades.ComputeValues(playerLevels)
+			SpawnRocks(upgrade_mults.heatsinks_mult)
+
 			mineRock.Reset()
 		end
 		if action then
@@ -240,7 +245,9 @@ end
 -- //GAME FUNCTIONS//
 function Start()
 	playerLevels, money, collectables, rockCounter = playerProgress.Load(playerUpgrades) -- LOAD
-	SpawnRocks()
+
+	local upgrade_mults = playerUpgrades.ComputeValues(playerLevels)
+	SpawnRocks(upgrade_mults.heatsinks_mult)
 
 	museum.Start(playerRewards.GetCollectableList())
 	ResetPresentation()

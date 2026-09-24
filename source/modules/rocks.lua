@@ -105,8 +105,9 @@ local rock = {}
 
 ---@param context GameContext
 ---@param rockType RockType
+---@param heat_sink_mult number
 ---@return RockGeneric?
-function rock.CreateRock(context, rockType)
+function rock.CreateRock(context, rockType, heat_sink_mult)
 	---@type RockGeneric?
 	local rockFound
 	if rockType == "rock1" then
@@ -134,7 +135,11 @@ function rock.CreateRock(context, rockType)
 	sprite.x = context.screenW / 2 - sprite.w / 2
 	sprite.y = (context.screenH / 2 - sprite.h / 2) + 30
 
-	rockCreated.heatToMatch = math.random(10, 90) -- TODO: TEMP
+	local max = 100
+	local min = 10
+	local computedBuffer = rockCreated.heatBuffer + heat_sink_mult
+
+	rockCreated.heatToMatch = math.random(min + computedBuffer, max - computedBuffer)
 
 	return rockCreated
 end
@@ -193,7 +198,7 @@ function rock.CheckRocks(context, activeRock, rockSpawnTime, upgrade_mults)
 		end) ]]
 		local updatedRewardsTable = rock.UpdateRewardsTable(activeRock, upgrade_mults.drop_chances_mult)
 
-		local spawnedRock = rock.CreateRock(context, activeRock.rockType)
+		local spawnedRock = rock.CreateRock(context, activeRock.rockType, upgrade_mults.heatsinks_mult)
 
 		return spawnedRock, updatedRewardsTable, rockSpawnTask
 	end
