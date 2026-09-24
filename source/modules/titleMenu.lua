@@ -36,7 +36,9 @@ end
 function menu.Accept()
 	local now = pd.getCurrentTimeMilliseconds()
 	if confirming then
-		if now - confirmedAt >= 300 then return "reset" end
+		if now - confirmedAt >= 300 then
+			return "reset"
+		end
 	elseif selected == 1 then
 		return "play"
 	else
@@ -80,9 +82,12 @@ function menu.Draw(money, saveFailed)
 
 	gfx.fillRoundRect(134, 83, 132, 44, 5)
 	gfx.setColor(gfx.kColorBlack)
-	gfx.drawRoundRect(134, 83, 132, 44, 5)
-	Center("DRILL", 91, heading)
-	if canContinue then Center("$" .. money .. " saved", 135, small) end
+	--[[ gfx.drawRoundRect(134, 83, 132, 44, 5) ]]
+	Center("CRANKY", 81, heading)
+	Center("DWARF", 110, small)
+	if canContinue then
+		Center("$" .. money .. " saved", 135, small)
+	end
 	local count = canContinue and 2 or 1
 	for index = 1, count do
 		local y = 159 + (index - 1) * 31
