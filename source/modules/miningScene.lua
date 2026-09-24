@@ -14,12 +14,49 @@ local drillFrames = {
 for index, image in ipairs(drillFrames) do
 	drillFrames[index] = image:scaledImage(0.5)
 end
-local rockFrames = {
-	gfx.image.new("assets/textures/stone1/stone1_default"),
-	gfx.image.new("assets/textures/stone1/stone1_slightly_cracked"),
-	gfx.image.new("assets/textures/stone1/stone1_cracked"),
-	gfx.image.new("assets/textures/stone1/stone1_broken"),
-}
+local function RockMask(image)
+	if image:sample(0, 0) ~= gfx.kColorWhite then return end
+	local width, height = image:getSize()
+	local mask = gfx.image.new(width, height, gfx.kColorWhite)
+	local pending, cursor = { 0 }, 1
+	gfx.pushContext(mask)
+	gfx.setColor(gfx.kColorBlack)
+	gfx.drawPixel(0, 0)
+	local function Visit(x, y)
+		if x < 0 or x >= width or y < 0 or y >= height then return end
+		if mask:sample(x, y) == gfx.kColorWhite and image:sample(x, y) == gfx.kColorWhite then
+			gfx.drawPixel(x, y)
+			table.insert(pending, y * width + x)
+		end
+	end
+	while cursor <= #pending do
+		local pixel = pending[cursor]
+		local x, y = pixel % width, math.floor(pixel / width)
+		Visit(x - 1, y)
+		Visit(x + 1, y)
+		Visit(x, y - 1)
+		Visit(x, y + 1)
+		cursor += 1
+	end
+	gfx.popContext()
+	return mask
+end
+
+local rockFrames = {}
+for index = 1, 3 do
+	local path = "assets/textures/stone" .. index .. "/stone" .. index
+	local frames = {
+		gfx.image.new(path .. "_default"),
+		gfx.image.new(path .. "_slightly_cracked"),
+		gfx.image.new(path .. "_cracked"),
+	}
+	if index == 1 then table.insert(frames, gfx.image.new(path .. "_broken")) end
+	local mask = RockMask(frames[1])
+	if mask then
+		for _, frame in ipairs(frames) do frame:setMaskImage(mask) end
+	end
+	rockFrames["rock" .. index] = frames
+end
 local oreImages = {}
 for _, name in ipairs({ "Coal", "Topaz", "Diamond", "Emerald", "Ruby" }) do
 	oreImages[name] = gfx.image.new("assets/textures/ores/" .. string.lower(name))
@@ -246,8 +283,9 @@ function scene.Draw(
 
 	local age = now - breakAt
 	local sprite = rock.sprite
+	local frames = rockFrames[rock.rockType]
 	if age < 75 then
-		rockFrames[4]:draw(sprite.x + rockX, sprite.y + rockY)
+		frames[#frames]:draw(sprite.x + rockX, sprite.y + rockY)
 	elseif age >= 300 then
 		local ratio = rock.health / rock.maxHealth
 		local frame = 1
@@ -265,7 +303,7 @@ function scene.Draw(
 		if flashing then
 			gfx.setImageDrawMode(gfx.kDrawModeInverted)
 		end
-		rockFrames[frame]:draw(sprite.x + rockX, math.floor(sprite.y + rockY - arrival * arrival * 18))
+		frames[math.min(frame, #frames)]:draw(sprite.x + rockX, math.floor(sprite.y + rockY - arrival * arrival * 18))
 		gfx.setImageDrawMode(gfx.kDrawModeCopy)
 	end
 	drill:draw(184 + rumble, drillTop)
