@@ -4,30 +4,30 @@
 ---@type RewardInfo
 local coal = {
 	valuableType = "Coal",
-	value = 5,
+	value = 1,
 }
 
 ---@type RewardInfo
 local topaz = {
 	valuableType = "Topaz",
-	value = 50,
+	value = 3,
 }
 ---@type RewardInfo
 local diamond = {
 	valuableType = "Diamond",
-	value = 200,
+	value = 6,
 }
 
 ---@type RewardInfo
 local emerald = {
 	valuableType = "Emerald",
-	value = 200,
+	value = 8,
 }
 
 ---@type RewardInfo
 local ruby = {
 	valuableType = "Ruby",
-	value = 200,
+	value = 10,
 }
 
 --- // COLLECTABLES //
