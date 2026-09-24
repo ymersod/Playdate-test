@@ -248,6 +248,7 @@ function Start()
 end
 Start()
 
+local lastOverheatSound = 0
 local lastUpdate = playdate.getCurrentTimeMilliseconds()
 function playdate.update()
 	---@type RockGeneric?
@@ -338,6 +339,13 @@ function playdate.update()
 	local collected, rare = miningScene.Update(delta, change, not pd.isCrankDocked() and not overheated, now)
 	if collected > 0 then
 		upgradeMenu.Sound(rare and "reward" or "collect")
+	end
+
+	if overheated then
+		if playdate.getCurrentTimeMilliseconds() - lastOverheatSound >= 400 then
+			upgradeMenu.Sound("overheat")
+			lastOverheatSound = playdate.getCurrentTimeMilliseconds()
+		end
 	end
 
 	miningScene.Draw(

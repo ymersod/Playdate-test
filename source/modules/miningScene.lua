@@ -27,6 +27,8 @@ end
 
 local small = gfx.font.new("fonts/Roobert-10-Bold")
 local body = gfx.font.new("fonts/Roobert-11-Medium")
+local heading = gfx.font.new("fonts/Roobert-20-Medium")
+
 local pieces = {}
 local splitRock = gfx.image.new("assets/textures/stone1/stone1_broken_splitterpieces")
 for _, rect in ipairs({ { 2, 72, 27, 32 }, { 107, 51, 20, 21 }, { 95, 93, 22, 21 } }) do
@@ -310,11 +312,13 @@ function scene.Draw(
 		heatTargetVisualH = left
 	end
 
-	gfx.setColor(gfx.kColorWhite)
-	gfx.drawRoundRect(26, curHeatY - 2, 16, heatTargetVisualH + 4, 4)
+	if not overheated then
+		gfx.setColor(gfx.kColorWhite)
+		gfx.drawRoundRect(26, curHeatY - 2, 16, heatTargetVisualH + 4, 4)
 
-	gfx.setColor(gfx.kColorBlack)
-	gfx.drawRoundRect(28, curHeatY, 12, heatTargetVisualH, 2)
+		gfx.setColor(gfx.kColorBlack)
+		gfx.drawRoundRect(28, curHeatY, 12, heatTargetVisualH, 2)
+	end
 
 	-- // HEAT-BAR
 	gfx.setColor(gfx.kColorWhite)
@@ -370,9 +374,38 @@ function scene.Draw(
 	Text(saveFailed and "Save failed - retry in Menu" or prompt, 10, 224, small, true)
 	Text("B Title", 350, 224, small, true)
 	if not saveFailed and (overheated or pd.isCrankDocked()) then
-		local hint = overheated and "!!!OVERHEAT!!! DRILL BABY DRILL" or "Undock to drill"
-		local width = small:getTextWidth(hint)
-		Text(hint, 218 - width / 2, 224, small, true)
+		if overheated then
+			local overheatText = "!OVERHEAT!"
+			local drillText = "DRILL BABY DRILL"
+
+			local overheatWidth = body:getTextWidth(overheatText)
+			local drillWidth = small:getTextWidth(drillText)
+
+			local boxWidth = math.max(overheatWidth, drillWidth) + 12
+			local boxX = 200 - boxWidth / 2
+
+			gfx.setColor(gfx.kColorWhite)
+			gfx.fillRoundRect(boxX, 77, boxWidth, 49, 4)
+
+			gfx.setColor(gfx.kColorBlack)
+			gfx.drawRoundRect(boxX, 77, boxWidth, 49, 4)
+
+			Text(overheatText, 200 - overheatWidth / 2, 82, body, false)
+
+			local flash = math.floor(playdate.getCurrentTimeMilliseconds() / 100) % 2 == 0
+
+			gfx.setColor(flash and gfx.kColorBlack or gfx.kColorWhite)
+			gfx.fillRoundRect(200 - drillWidth / 2 - 4, 101, drillWidth + 8, 19, 3)
+
+			gfx.setColor(flash and gfx.kColorWhite or gfx.kColorBlack)
+			gfx.fillRoundRect(200 - drillWidth / 2 - 3, 102, drillWidth + 6, 17, 3)
+
+			Text(drillText, 200 - drillWidth / 2, 103, small, true)
+		else
+			local hint = "Undock to drill"
+			local width = small:getTextWidth(hint)
+			Text(hint, 218 - width / 2, 254, small, true)
+		end
 	end
 	if now - findAt < 2200 or now - collectedAt < 850 then
 		local found = now - findAt < 2200
